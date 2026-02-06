@@ -12,9 +12,13 @@ app.use(express.json());
 mongoose.connect(process.env.MONGODB_URI);
 
 // Routes
-app.use('/api/tabs', require('./routes/tabs'));
-app.use('/api/simplify', require('./routes/content'));
-app.use('/api/youtube', require('./routes/youtube'));
+app.use('/api/tabs', require('./routes/tabs.js'));
+app.use('/api/simplify', require('./routes/content.js'));
+app.use('/api/youtube', require('./routes/youtube.js'));
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok' });
+});
+
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
