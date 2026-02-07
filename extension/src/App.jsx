@@ -1,19 +1,18 @@
 import { useState, useEffect } from 'react';
 import './App.css';
+import TabManager from './components/TabManager.jsx';
 
 function App() {
+  const [activeView, setActiveView] = useState('home');
   const [activeTab, setActiveTab] = useState(null);
   const [backendStatus, setBackendStatus] = useState('checking...');
 
   useEffect(() => {
-    // Get current active tab
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (tabs[0]) {
         setActiveTab(tabs[0]);
       }
     });
-
-    // Check backend connection
     checkBackend();
   }, []);
 
@@ -26,6 +25,17 @@ function App() {
       setBackendStatus('❌ Backend Offline');
     }
   };
+
+  if (activeView === 'tabs') {
+    return (
+      <div className="app">
+        <button className="back-btn" onClick={() => setActiveView('home')}>
+          ← Back
+        </button>
+        <TabManager />
+      </div>
+    );
+  }
 
   return (
     <div className="app">
@@ -51,12 +61,18 @@ function App() {
 
         <div className="section">
           <h3>🚀 Quick Actions</h3>
-          <button className="action-btn" onClick={() => alert('Coming in Day 2!')}>
-            🗂️ Manage Tabs
+          
+          <button 
+            className="action-btn" 
+            onClick={() => setActiveView('tabs')}
+          >
+            🗂️ Manage Tabs (NEW!)
           </button>
+          
           <button className="action-btn" onClick={() => alert('Coming in Day 3!')}>
             📝 Simplify Content
           </button>
+          
           <button className="action-btn" onClick={() => alert('Coming in Day 4!')}>
             🎥 YouTube Summary
           </button>
