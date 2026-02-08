@@ -3,7 +3,8 @@ const mongoose = require('mongoose');
 const TabSchema = new mongoose.Schema({
   userId: {
     type: String,
-    required: true
+    required: true,
+    default: 'default_user'
   },
   tabData: [{
     tabId: Number,

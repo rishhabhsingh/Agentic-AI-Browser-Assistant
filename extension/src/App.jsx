@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import './App.css';
 import TabManager from './components/TabManager.jsx';
+import ContentSimplifier from './components/ContentSimplifier'
 
 function App() {
   const [activeView, setActiveView] = useState('home');
@@ -25,6 +26,17 @@ function App() {
       setBackendStatus('❌ Backend Offline');
     }
   };
+
+    if (activeView === 'simplify') {
+    return (
+      <div className="app">
+        <button className="back-btn" onClick={() => setActiveView('home')}>
+          ← Back
+        </button>
+        <ContentSimplifier />
+      </div>
+    );
+  }
 
   if (activeView === 'tabs') {
     return (
@@ -69,8 +81,11 @@ function App() {
             🗂️ Manage Tabs (NEW!)
           </button>
           
-          <button className="action-btn" onClick={() => alert('Coming in Day 3!')}>
-            📝 Simplify Content
+          <button 
+            className="action-btn" 
+            onClick={() => setActiveView('simplify')}
+          >
+            📝 Simplify Content (NEW!)
           </button>
           
           <button className="action-btn" onClick={() => alert('Coming in Day 4!')}>

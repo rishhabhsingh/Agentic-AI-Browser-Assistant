@@ -1,10 +1,12 @@
-const { analyzeTabsWithAI, findDuplicateTabs } = require('../utils/openaiHelper');
+const { analyzeTabsWithGroq, quickScanTabs } = require('../utils/groqHelper');
 const Tab = require('../models/Tab');
 
-// Analyze tabs and provide suggestions
+// Analyze tabs
 exports.analyzeTabs = async (req, res) => {
   try {
     const { tabs, userId = 'default_user', useAI = true } = req.body;
+
+    console.log(`📊 Received request to analyze ${tabs?.length || 0} tabs`);
 
     if (!tabs || !Array.isArray(tabs) || tabs.length === 0) {
       return res.status(400).json({ 
@@ -13,40 +15,43 @@ exports.analyzeTabs = async (req, res) => {
       });
     }
 
-    console.log(`🔍 Analyzing ${tabs.length} tabs for user: ${userId}`);
-
     let suggestions = [];
 
     if (useAI) {
-      // Use AI for smart analysis
+      console.log('🤖 Using AI analysis...');
       try {
-        suggestions = await analyzeTabsWithAI(tabs);
-        console.log(`🤖 AI found ${suggestions.length} suggestions`);
+        suggestions = await analyzeTabsWithGroq(tabs);
+        console.log(`✅ AI found ${suggestions.length} suggestions`);
       } catch (error) {
-        console.error('AI analysis failed, falling back to simple logic:', error);
-        suggestions = findDuplicateTabs(tabs);
+        console.error('AI failed, using quick scan:', error.message);
+        suggestions = quickScanTabs(tabs);
       }
     } else {
-      // Use simple duplicate detection
-      suggestions = findDuplicateTabs(tabs);
+      console.log('⚡ Using quick scan...');
+      suggestions = quickScanTabs(tabs);
     }
 
-    // Save analysis to database
-    const tabAnalysis = new Tab({
-      userId,
-      tabData: tabs.map(tab => ({
-        tabId: tab.id,
-        title: tab.title,
-        url: tab.url
-      })),
-      suggestions: suggestions.map(s => ({
-        tabId: tabs[s.tabIndex]?.id,
-        reason: s.reason,
-        confidence: s.confidence
-      }))
-    });
+    // Save to database
+    try {
+      const tabAnalysis = new Tab({
+        userId,
+        tabData: tabs.map(tab => ({
+          tabId: tab.id,
+          title: tab.title,
+          url: tab.url
+        })),
+        suggestions: suggestions.map(s => ({
+          tabId: tabs[s.tabIndex]?.id,
+          reason: s.reason,
+          confidence: s.confidence
+        }))
+      });
 
-    await tabAnalysis.save();
+      await tabAnalysis.save();
+      console.log('💾 Saved to database');
+    } catch (dbError) {
+      console.error('Database save failed (continuing anyway):', dbError.message);
+    }
 
     res.json({
       success: true,
@@ -58,11 +63,11 @@ exports.analyzeTabs = async (req, res) => {
       })),
       message: suggestions.length > 0 
         ? `Found ${suggestions.length} tabs you might want to close` 
-        : 'All tabs look good! No suggestions.'
+        : 'All tabs look good!'
     });
 
   } catch (error) {
-    console.error('❌ Error analyzing tabs:', error);
+    console.error('❌ Error in analyzeTabs:', error);
     res.status(500).json({ 
       success: false, 
       message: 'Failed to analyze tabs',
@@ -71,7 +76,7 @@ exports.analyzeTabs = async (req, res) => {
   }
 };
 
-// Get tab statistics
+// Get stats
 exports.getTabStats = async (req, res) => {
   try {
     const { tabs } = req.body;
@@ -83,36 +88,26 @@ exports.getTabStats = async (req, res) => {
       });
     }
 
-    // Calculate statistics
     const stats = {
       total: tabs.length,
       domains: {},
-      protocols: {
-        https: 0,
-        http: 0,
-        other: 0
-      }
+      protocols: { https: 0, http: 0, other: 0 }
     };
 
     tabs.forEach(tab => {
       try {
         const url = new URL(tab.url);
-        
-        // Count by domain
         const domain = url.hostname;
         stats.domains[domain] = (stats.domains[domain] || 0) + 1;
         
-        // Count by protocol
         if (url.protocol === 'https:') stats.protocols.https++;
         else if (url.protocol === 'http:') stats.protocols.http++;
         else stats.protocols.other++;
-        
       } catch (error) {
-        // Invalid URL, skip
+        // Skip invalid URLs
       }
     });
 
-    // Find most common domains
     const sortedDomains = Object.entries(stats.domains)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 5)
@@ -127,15 +122,16 @@ exports.getTabStats = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Error calculating stats:', error);
+    console.error('❌ Error in getTabStats:', error);
     res.status(500).json({ 
       success: false, 
-      message: 'Failed to calculate statistics' 
+      message: 'Failed to calculate statistics',
+      error: error.message 
     });
   }
 };
 
-// Get analysis history
+// Get history
 exports.getHistory = async (req, res) => {
   try {
     const { userId = 'default_user' } = req.query;
@@ -155,10 +151,11 @@ exports.getHistory = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Error fetching history:', error);
+    console.error('❌ Error in getHistory:', error);
     res.status(500).json({ 
       success: false, 
-      message: 'Failed to fetch history' 
+      message: 'Failed to fetch history',
+      error: error.message 
     });
   }
 };
