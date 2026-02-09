@@ -9,23 +9,32 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// MongoDB Connection
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('✅ MongoDB Connected'))
-  .catch(err => console.error('❌ MongoDB Error:', err));
+// ✅ UPDATED: Make MongoDB optional
+if (process.env.MONGODB_URI && process.env.MONGODB_URI !== 'your_mongodb_connection_string_here') {
+  mongoose.connect(process.env.MONGODB_URI)
+    .then(() => console.log('✅ MongoDB Connected'))
+    .catch(err => {
+      console.warn('⚠️ MongoDB Warning:', err.message);
+      console.log('📝 Continuing without database (history features disabled)');
+    });
+} else {
+  console.log('📝 MongoDB not configured - history features disabled');
+}
 
 // Health Check
 app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'ok', 
     message: 'BrowserBuddy AI Backend is running with GROQ!',
-    timestamp: new Date()
+    timestamp: new Date(),
+    mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
   });
 });
 
 // Routes
 app.use('/api/tabs', require('./routes/tabs'));
 app.use('/api/simplify', require('./routes/simplify'));
+app.use('/api/youtube', require('./routes/youtube'));
 
 // Error handling middleware
 app.use((err, req, res, next) => {

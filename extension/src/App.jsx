@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import './App.css';
 import TabManager from './components/TabManager.jsx';
 import ContentSimplifier from './components/ContentSimplifier'
+import YouTubeSummary from './components/YouTubeSummary'
+import ReadingMode from './components/ReadingMode'
 
 function App() {
   const [activeView, setActiveView] = useState('home');
@@ -49,6 +51,28 @@ function App() {
     );
   }
 
+  if (activeView === 'youtube') {
+    return (
+      <div className="app">
+        <button className="back-btn" onClick={() => setActiveView('home')}>
+          ← Back
+        </button>
+        <YouTubeSummary />
+      </div>
+    );
+  }
+
+  if (activeView === 'reading') {
+    return (
+      <div className="app">
+        <button className="back-btn" onClick={() => setActiveView('home')}>
+          ← Back
+        </button>
+        <ReadingMode />
+      </div>
+    );
+  }
+
   return (
     <div className="app">
       <header className="header">
@@ -88,8 +112,18 @@ function App() {
             📝 Simplify Content (NEW!)
           </button>
           
-          <button className="action-btn" onClick={() => alert('Coming in Day 4!')}>
-            🎥 YouTube Summary
+          <button 
+            className="action-btn" 
+            onClick={() => setActiveView('youtube')}
+          >
+            🎥 YouTube Summary (NEW!)
+          </button>
+
+          <button 
+            className="action-btn" 
+            onClick={() => setActiveView('reading')}
+          >
+            📖 Reading Mode (NEW!)
           </button>
         </div>
 

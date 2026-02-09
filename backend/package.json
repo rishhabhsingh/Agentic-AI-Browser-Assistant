@@ -16,7 +16,8 @@
     "express": "^5.2.1",
     "grok-sdk": "^0.0.1-security",
     "groq-sdk": "^0.37.0",
-    "mongoose": "^9.1.6"
+    "mongoose": "^9.1.6",
+    "youtube-captions-scraper": "^2.0.3"
   },
   "devDependencies": {
     "nodemon": "^3.1.11"

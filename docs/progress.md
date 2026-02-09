@@ -23,7 +23,7 @@
 - Manifest V3: ✅ Valid
 
 ### Issues Encountered:
-- None / [List any issues you faced]
+- None 
 
 ### Next Steps (Day 2):
 - [ ] Build Smart Tab Manager
@@ -62,13 +62,8 @@
 - 🗑️ One-click cleanup
 
 ### Issues Encountered:
-[List any issues]
+- None
 
-### Next Steps (Day 3):
-- [ ] Build Content Simplifier
-- [ ] Text extraction from web pages
-- [ ] AI simplification API
-- [ ] Reading level selector
 
 ---
 
@@ -99,5 +94,26 @@
 - 📋 Copy simplified text
 - 📄 Summarize entire page
 
+### Issues Encountered:
+- None
+
 ---
+
+## Day 4: ✅ COMPLETED (Date: 9/2/26)
+
+### Features Built:
+- [x] Smart Reading Mode
+- [x] Font size adjustment
+- [x] Dark/Light mode
+
+### Total Features: 4
+1. Smart Tab Manager ✅
+2. Content Simplifier ✅
+3. YouTube Summary ❌
+4. Reading Mode ✅
+
+---
+
+## Day 5: ✅ COMPLETED (Date: 10/2/26)
+
 

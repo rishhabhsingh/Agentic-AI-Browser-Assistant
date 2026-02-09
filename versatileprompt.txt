@@ -7,12 +7,13 @@ CORE FEATURES:
 3. YouTube Intelligence - Generates transcripts, summaries, and key points from videos
 4. Smart Bookmarking - AI-categorized bookmarks with smart search
 5. Quick Actions Panel - Floating widget for instant AI assistance
+6. Smart Reading Mode - Restricts ads, lets user to read in a easy mannner
 
 TECH STACK:
 - Frontend: React.js (Chrome Extension)
 - Backend: Node.js + Express.js
 - Database: MongoDB
-- AI Integration: OpenAI API (GPT-4) or Claude API
+- AI Integration: Groq- API
 - Deployment: Backend on Render/Railway, Extension on Chrome Web Store
 
 ARCHITECTURE:
