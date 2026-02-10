@@ -305,3 +305,112 @@ function applyReadingModeStyles(fontSize, darkMode) {
   
   document.head.appendChild(style);
 }
+
+// ============================================
+// FORM FILLING FUNCTIONS
+// ============================================
+
+// Detect form fields on page
+function detectFormFields() {
+  const fields = [];
+  
+  // Get all input fields
+  const inputs = document.querySelectorAll('input, textarea, select');
+  
+  inputs.forEach((input, index) => {
+    // Skip hidden, submit, button types
+    if (input.type === 'hidden' || input.type === 'submit' || input.type === 'button') {
+      return;
+    }
+    
+    // Get field info
+    const field = {
+      index: index,
+      type: input.type || input.tagName.toLowerCase(),
+      name: input.name || '',
+      id: input.id || '',
+      placeholder: input.placeholder || '',
+      label: getFieldLabel(input),
+      value: input.value || ''
+    };
+    
+    fields.push(field);
+  });
+  
+  return fields;
+}
+
+// Get label for input field
+function getFieldLabel(input) {
+  // Try to find associated label
+  if (input.id) {
+    const label = document.querySelector(`label[for="${input.id}"]`);
+    if (label) return label.innerText.trim();
+  }
+  
+  // Try parent label
+  const parentLabel = input.closest('label');
+  if (parentLabel) return parentLabel.innerText.trim();
+  
+  // Try previous sibling label
+  let prev = input.previousElementSibling;
+  if (prev && prev.tagName === 'LABEL') {
+    return prev.innerText.trim();
+  }
+  
+  // Fallback to placeholder or name
+  return input.placeholder || input.name || 'Unknown';
+}
+
+// Fill form with matched data
+function fillFormFields(matches) {
+  let filledCount = 0;
+  
+  const inputs = document.querySelectorAll('input, textarea, select');
+  
+  matches.forEach(match => {
+    const input = inputs[match.fieldIndex];
+    
+    if (input && match.value) {
+      // Set value
+      input.value = match.value;
+      
+      // Trigger change event (for React forms, etc.)
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+      
+      // Visual feedback
+      input.style.backgroundColor = 'rgba(39, 174, 96, 0.2)';
+      setTimeout(() => {
+        input.style.backgroundColor = '';
+      }, 1000);
+      
+      filledCount++;
+    }
+  });
+  
+  return filledCount;
+}
+
+// Listen for form fill messages
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  // ... existing code ...
+  
+  if (request.action === 'detectFormFields') {
+    console.log('📝 Detecting form fields...');
+    const fields = detectFormFields();
+    console.log(`✅ Detected ${fields.length} fields`);
+    sendResponse({ success: true, fields: fields });
+    return true;
+  }
+  
+  if (request.action === 'fillForm') {
+    console.log('✍️ Filling form...');
+    const filledCount = fillFormFields(request.matches);
+    console.log(`✅ Filled ${filledCount} fields`);
+    sendResponse({ success: true, filledCount: filledCount });
+    return true;
+  }
+  
+  // ... rest of existing code ...
+});

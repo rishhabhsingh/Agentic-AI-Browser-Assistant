@@ -35,6 +35,10 @@ app.get('/api/health', (req, res) => {
 app.use('/api/tabs', require('./routes/tabs'));
 app.use('/api/simplify', require('./routes/simplify'));
 app.use('/api/youtube', require('./routes/youtube'));
+app.use('/api/formfill', require('./routes/formfill'));
+app.use('/api/resume', require('./routes/resume')); 
+app.use('/api/settings', require('./routes/settings'));
+app.use('/api/bookmarks', require('./routes/bookmarks'));
 
 // Error handling middleware
 app.use((err, req, res, next) => {

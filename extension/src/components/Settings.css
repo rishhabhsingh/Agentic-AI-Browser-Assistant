@@ -1,0 +1,210 @@
+.settings {
+  width: 100%;
+  max-height: 600px;
+  overflow-y: auto;
+  background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+  color: white;
+}
+
+.settings-header {
+  padding: 20px;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.1));
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.settings-header h2 {
+  font-size: 22px;
+  margin-bottom: 8px;
+  background: linear-gradient(135deg, #fff, #ecf0f1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 700;
+}
+
+.settings-subtitle {
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+.settings-content {
+  padding: 20px;
+}
+
+.settings-section {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+.settings-section h3 {
+  font-size: 16px;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.setting-item {
+  margin-bottom: 15px;
+}
+
+.setting-item label {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.setting-item small {
+  display: block;
+  font-size: 12px;
+  opacity: 0.8;
+  font-weight: 400;
+  margin-top: 4px;
+}
+
+.setting-item select {
+  width: 100%;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.setting-item select option {
+  background: #2c3e50;
+  color: white;
+}
+
+.slider-container {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.slider-container input[type="range"] {
+  flex: 1;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+  outline: none;
+  cursor: pointer;
+}
+
+.slider-container input[type="range"]::-webkit-slider-thumb {
+  width: 20px;
+  height: 20px;
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(52, 152, 219, 0.5);
+}
+
+.slider-container span {
+  font-size: 14px;
+  font-weight: 600;
+  min-width: 45px;
+}
+
+.setting-item.toggle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.setting-item.toggle label {
+  margin-bottom: 0;
+  flex: 1;
+}
+
+.setting-item.toggle input[type="checkbox"] {
+  width: 50px;
+  height: 26px;
+  appearance: none;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 13px;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.setting-item.toggle input[type="checkbox"]:checked {
+  background: linear-gradient(135deg, #27ae60, #229954);
+}
+
+.setting-item.toggle input[type="checkbox"]::before {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: white;
+  border-radius: 50%;
+  top: 2px;
+  left: 2px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.setting-item.toggle input[type="checkbox"]:checked::before {
+  left: 26px;
+}
+
+.about-info {
+  padding: 15px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.about-info p {
+  margin: 5px 0;
+}
+
+.settings-footer {
+  position: sticky;
+  bottom: 0;
+  padding: 15px 20px;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.3));
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+}
+
+.save-settings-btn {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+}
+
+.save-settings-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(39, 174, 96, 0.5);
+}
+
+.save-settings-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.loading {
+  padding: 40px;
+  text-align: center;
+  font-size: 14px;
+  opacity: 0.8;
+}
