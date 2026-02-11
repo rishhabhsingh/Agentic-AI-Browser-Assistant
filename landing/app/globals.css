@@ -1,0 +1,138 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+@layer base {
+  :root {
+    --background: 0 0% 7%;
+    --foreground: 0 0% 96%;
+    --card: 0 0% 10%;
+    --card-foreground: 0 0% 96%;
+    --popover: 0 0% 10%;
+    --popover-foreground: 0 0% 96%;
+    --primary: 24 80% 52%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 204 70% 53%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 0 0% 14%;
+    --muted-foreground: 0 0% 60%;
+    --accent: 24 80% 52%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 18%;
+    --input: 0 0% 18%;
+    --ring: 24 80% 52%;
+    --chart-1: 24 80% 52%;
+    --chart-2: 204 70% 53%;
+    --chart-3: 0 0% 60%;
+    --chart-4: 24 100% 42%;
+    --chart-5: 204 90% 43%;
+    --radius: 0.75rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: hsl(0 0% 7%);
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(24 80% 52%);
+  border-radius: 3px;
+}
+
+/* Glass effect utility */
+.glass {
+  background: rgba(26, 26, 26, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Gradient text utility */
+.gradient-text {
+  background: linear-gradient(135deg, #e67e22 0%, #d35400 50%, #3498db 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Animated gradient background */
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient-shift 8s ease infinite;
+}
+
+/* Glow effect */
+.glow-orange {
+  box-shadow: 0 0 20px rgba(230, 126, 34, 0.3), 0 0 60px rgba(230, 126, 34, 0.1);
+}
+
+.glow-blue {
+  box-shadow: 0 0 20px rgba(52, 152, 219, 0.3), 0 0 60px rgba(52, 152, 219, 0.1);
+}
+
+/* Floating animation */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float-delayed {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-15px); }
+}
+
+.animate-float-delayed {
+  animation: float-delayed 5s ease-in-out 1s infinite;
+}
+
+/* Pulse glow */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(230, 126, 34, 0.3); }
+  50% { box-shadow: 0 0 40px rgba(230, 126, 34, 0.6), 0 0 80px rgba(230, 126, 34, 0.2); }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+/* Mesh gradient background */
+.mesh-gradient {
+  background:
+    radial-gradient(at 20% 30%, rgba(230, 126, 34, 0.15) 0px, transparent 50%),
+    radial-gradient(at 80% 20%, rgba(52, 152, 219, 0.1) 0px, transparent 50%),
+    radial-gradient(at 50% 80%, rgba(211, 84, 0, 0.08) 0px, transparent 50%);
+}
