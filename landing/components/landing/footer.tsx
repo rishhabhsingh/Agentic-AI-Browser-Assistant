@@ -1,11 +1,13 @@
 "use client"
 
-import { Github, FileText, Lock } from "lucide-react"
+import { Github, FileText, Lock, CircleUserRound, Mail } from "lucide-react"
 
 const links = [
-  { label: "GitHub", href: "https://github.com", icon: Github },
   { label: "Documentation", href: "#", icon: FileText },
-  { label: "Privacy Policy", href: "#", icon: Lock },
+  { label: "GitHub", href: "https://github.com/rishhabhsingh", icon: Github },
+  { label: "About the Developer", href: "#", icon: CircleUserRound },
+  { label: "Contact", href: "https://www.linkedin.com/in/rishabh-singh-b13773225", icon: Mail },
+   { label: "Privacy Policy", href: "#", icon: Lock }
 ]
 
 export function Footer() {

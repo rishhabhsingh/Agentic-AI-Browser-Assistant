@@ -61,7 +61,7 @@ export function CTA() {
                 <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
               </a>
               <a
-                href="https://github.com"
+                href="https://github.com/rishhabhsingh/Agentic-AI-Browser-Assistant.git"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 rounded-full border border-border bg-transparent px-8 py-4 text-base font-medium text-foreground transition-all duration-300 hover:border-muted-foreground"

@@ -12,7 +12,7 @@ const faqs = [
   {
     question: "Is it really free?",
     answer:
-      "Yes, 100% free forever. BrowserBuddy AI is built as a passion project and will always remain completely free to use. No hidden charges, no premium tiers, no catch.",
+      "Yes — BrowserBuddy AI is completely free to use. There are no hidden charges, subscriptions, or premium tiers.",
   },
   {
     question: "Does it work offline?",
@@ -22,17 +22,21 @@ const faqs = [
   {
     question: "Is my data safe?",
     answer:
-      "Absolutely. BrowserBuddy AI follows a privacy-first approach. Your browsing data stays local on your device. We don't collect, store, or sell any personal information. AI processing happens through secure API calls with no data retention.",
+      "Yes. BrowserBuddy AI follows a privacy-first approach. Your browsing data stays on your device. We do not collect, store, or sell any personal information. AI requests are processed securely via API calls with no data retention.",
   },
   {
     question: "Which browsers are supported?",
     answer:
-      "BrowserBuddy AI works on all Chromium-based browsers including Google Chrome, Microsoft Edge, Brave, Opera, and Vivaldi. We're exploring Firefox support for the future.",
+      "BrowserBuddy AI works on all Chromium-based browsers, including Google Chrome, Microsoft Edge, Brave, Opera, and Vivaldi. Firefox support is being explored.",
   },
   {
     question: "How do I report bugs?",
     answer:
-      "You can report bugs by opening an issue on our GitHub repository. We actively monitor and respond to all bug reports. Community contributions and pull requests are also welcome!",
+      "You can report bugs by opening an issue on our GitHub repository. We actively monitor reports and welcome community contributions and pull requests.",
+  },
+  {
+    question: "Why does this extension need certain permissions?",
+    answer: "BrowserBuddy AI requires certain browser permissions to manage tabs and improve reading experiences. These permissions are used strictly for functionality and never for data collection.",
   },
 ]
 
