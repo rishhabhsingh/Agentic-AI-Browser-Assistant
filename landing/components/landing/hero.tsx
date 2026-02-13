@@ -132,12 +132,12 @@ export function Hero() {
             <div className="relative bg-background/50 p-8 md:p-12">
               <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
                 {[
-                  { name: "Smart Tabs", color: "#e67e22" },
-                  { name: "Simplifier", color: "#3498db" },
-                  { name: "Reading Mode", color: "#e67e22" },
-                  { name: "Bookmarks", color: "#3498db" },
-                  { name: "Form Filler", color: "#e67e22" },
-                  { name: "Resume AI", color: "#3498db" },
+                  { name: "Smart Tabs", color: "#e67e22", width: 82},
+                  { name: "Simplifier", color: "#3498db", width: 74},
+                  { name: "Reading Mode", color: "#e67e22", width: 74},
+                  { name: "Bookmarks", color: "#3498db", width: 74},
+                  { name: "Form Filler", color: "#e67e22", width: 74},
+                  { name: "Resume AI", color: "#3498db", width: 74},
                 ].map((item) => (
                   <div
                     key={item.name}
@@ -155,7 +155,7 @@ export function Hero() {
                         className="h-full rounded-full"
                         style={{
                           backgroundColor: item.color,
-                          width: `${60 + Math.random() * 35}%`,
+                          width: `${item.width}%`,
                           opacity: 0.6,
                         }}
                       />
