@@ -25,44 +25,51 @@ function YouTubeSummary() {
   }, []);
 
   const analyzeVideo = async () => {
-    if (!videoId) {
-      alert('Please open a YouTube video first!');
-      return;
+  if (!videoId) {
+    alert('Please open a YouTube video first!');
+    return;
+  }
+
+  setLoading(true);
+  setResult(null);
+
+  try {
+    // Get video title from page
+    const videoTitle = document.querySelector('h1.ytd-video-primary-info-renderer')?.innerText ||
+                      document.querySelector('[class*="title"]')?.innerText ||
+                      'YouTube Video';
+
+    console.log('Analyzing video:', videoId, videoTitle);
+
+    const response = await fetch(`${API_URL}/youtube/analyze`, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        videoId: videoId,
+        url: videoUrl,
+        title: videoTitle,
+        description: ''
+      })
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      setResult(data);
+      setActiveTab('summary');
+    } else {
+      alert('Analysis failed: ' + (data.message || 'Unknown error'));
     }
-
-    setLoading(true);
-    setResult(null);
-
-    try {
-      console.log('Analyzing video:', videoId);
-
-      const response = await fetch(`${API_URL}/youtube/analyze`, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-          videoId: videoId,
-          url: videoUrl
-        })
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        setResult(data);
-        setActiveTab('summary');
-      } else {
-        alert('Failed: ' + (data.message || 'Could not analyze video'));
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      alert('Error! Make sure backend is running.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  } catch (error) {
+    console.error('Error:', error);
+    alert('Error! Make sure backend is running.');
+  } finally {
+    setLoading(false);
+  }
+};
 
   const copyTranscript = () => {
     if (result && result.transcript) {
@@ -131,16 +138,20 @@ function YouTubeSummary() {
 
           {/* Summary Tab */}
           {activeTab === 'summary' && (
-            <div className="summary-content">
-              <div className="stats-bar">
-                <span>📊 {result.stats.segmentCount} segments</span>
-                <span>⏱️ ~{result.stats.estimatedDuration} min</span>
-              </div>
-              <div className="summary-text">
-                {result.summary}
-              </div>
-            </div>
-          )}
+  <div className="summary-content">
+    <div className="stats-bar">
+      <span>ℹ️ Analysis based on video metadata</span>
+    </div>
+    <div className="summary-text">
+      {result.summary}
+    </div>
+    {result.note && (
+      <div className="note-box">
+        💡 {result.note}
+      </div>
+    )}
+  </div>
+)}
 
           {/* Transcript Tab */}
           {activeTab === 'transcript' && (

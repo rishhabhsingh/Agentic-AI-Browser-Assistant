@@ -158,57 +158,59 @@ Only include high-confidence matches (>70%). If a field doesn't match, skip it.`
       console.log(`✅ AI matched ${matches.length} fields`);
 
     } catch (aiError) {
-      console.error('AI matching failed, using fallback:', aiError.message);
+      console.error('AI matching failed, using enhanced fallback:', aiError.message);
       
-      // Fallback: Simple keyword matching
+      // ENHANCED FALLBACK - Better keyword matching
       matches = fields.map((field, index) => {
-        const label = (field.label || field.name || field.placeholder || '').toLowerCase();
+        const label = (field.label || field.name || field.placeholder || field.autocomplete || '').toLowerCase();
         
         let matchedKey = null;
         let value = null;
         let confidence = 0;
 
-        // Simple matching logic
-        if (label.includes('name') && !label.includes('last') && !label.includes('first')) {
+        // Enhanced matching with multiple keywords
+        const matchPatterns = {
+          fullName: ['full name', 'name', 'your name', 'complete name'],
+          firstName: ['first name', 'fname', 'given name', 'forename'],
+          lastName: ['last name', 'lname', 'surname', 'family name'],
+          email: ['email', 'e-mail', 'mail', 'email address'],
+          phone: ['phone', 'mobile', 'telephone', 'contact number', 'cell'],
+          address: ['address', 'street', 'location', 'residence'],
+          city: ['city', 'town', 'municipality'],
+          state: ['state', 'province', 'region'],
+          zipCode: ['zip', 'postal', 'pincode', 'postcode'],
+          country: ['country', 'nation'],
+          currentTitle: ['job title', 'position', 'role', 'designation', 'current title'],
+          company: ['company', 'organization', 'employer', 'workplace'],
+          linkedIn: ['linkedin', 'linked in'],
+          github: ['github', 'git hub'],
+          portfolio: ['portfolio', 'website', 'personal site'],
+          degree: ['degree', 'education', 'qualification'],
+          major: ['major', 'field', 'specialization', 'subject'],
+          university: ['university', 'college', 'school', 'institution'],
+          graduationYear: ['graduation', 'year', 'completion year'],
+          gpa: ['gpa', 'grade', 'marks', 'percentage']
+        };
+
+        // Check each pattern
+        for (const [key, patterns] of Object.entries(matchPatterns)) {
+          for (const pattern of patterns) {
+            if (label.includes(pattern)) {
+              matchedKey = key;
+              value = userData[key];
+              // Higher confidence for exact matches
+              confidence = label === pattern ? 95 : 85;
+              break;
+            }
+          }
+          if (matchedKey) break;
+        }
+
+        // Special case for name fields without prefix
+        if (!matchedKey && label.includes('name') && !label.includes('user') && !label.includes('company')) {
           matchedKey = 'fullName';
           value = userData.fullName;
-          confidence = 90;
-        } else if (label.includes('first') && label.includes('name')) {
-          matchedKey = 'firstName';
-          value = userData.firstName;
-          confidence = 95;
-        } else if (label.includes('last') && label.includes('name')) {
-          matchedKey = 'lastName';
-          value = userData.lastName;
-          confidence = 95;
-        } else if (label.includes('email')) {
-          matchedKey = 'email';
-          value = userData.email;
-          confidence = 95;
-        } else if (label.includes('phone') || label.includes('mobile')) {
-          matchedKey = 'phone';
-          value = userData.phone;
-          confidence = 90;
-        } else if (label.includes('address')) {
-          matchedKey = 'address';
-          value = userData.address;
-          confidence = 85;
-        } else if (label.includes('city')) {
-          matchedKey = 'city';
-          value = userData.city;
-          confidence = 90;
-        } else if (label.includes('state')) {
-          matchedKey = 'state';
-          value = userData.state;
-          confidence = 85;
-        } else if (label.includes('zip') || label.includes('postal')) {
-          matchedKey = 'zipCode';
-          value = userData.zipCode;
-          confidence = 90;
-        } else if (label.includes('country')) {
-          matchedKey = 'country';
-          value = userData.country;
-          confidence = 85;
+          confidence = 80;
         }
 
         if (matchedKey && value) {
@@ -222,6 +224,7 @@ Only include high-confidence matches (>70%). If a field doesn't match, skip it.`
         return null;
       }).filter(m => m !== null);
     }
+
 
     res.json({
       success: true,

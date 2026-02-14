@@ -307,23 +307,25 @@ function applyReadingModeStyles(fontSize, darkMode) {
 }
 
 // ============================================
-// FORM FILLING FUNCTIONS
+// FORM FILLING FUNCTIONS (FIXED VERSION)
 // ============================================
 
-// Detect form fields on page
+// Detect form fields on page - IMPROVED
 function detectFormFields() {
+  console.log('🔍 Starting form field detection...');
   const fields = [];
   
-  // Get all input fields
-  const inputs = document.querySelectorAll('input, textarea, select');
+  // Get all input fields including those in shadow DOM
+  const inputs = document.querySelectorAll('input:not([type="hidden"]):not([type="submit"]):not([type="button"]), textarea, select');
+  
+  console.log(`Found ${inputs.length} potential form fields`);
   
   inputs.forEach((input, index) => {
-    // Skip hidden, submit, button types
-    if (input.type === 'hidden' || input.type === 'submit' || input.type === 'button') {
+    // Skip if not visible
+    if (input.offsetParent === null && input.type !== 'hidden') {
       return;
     }
     
-    // Get field info
     const field = {
       index: index,
       type: input.type || input.tagName.toLowerCase(),
@@ -331,18 +333,27 @@ function detectFormFields() {
       id: input.id || '',
       placeholder: input.placeholder || '',
       label: getFieldLabel(input),
-      value: input.value || ''
+      value: input.value || '',
+      required: input.required || false,
+      autocomplete: input.autocomplete || ''
     };
     
+    console.log(`Field ${index}:`, field.label || field.placeholder || field.name);
     fields.push(field);
   });
   
+  console.log(`✅ Total fields detected: ${fields.length}`);
   return fields;
 }
 
-// Get label for input field
+// Get label for input field - IMPROVED
 function getFieldLabel(input) {
-  // Try to find associated label
+  // Try aria-label first
+  if (input.getAttribute('aria-label')) {
+    return input.getAttribute('aria-label');
+  }
+  
+  // Try associated label by ID
   if (input.id) {
     const label = document.querySelector(`label[for="${input.id}"]`);
     if (label) return label.innerText.trim();
@@ -350,67 +361,160 @@ function getFieldLabel(input) {
   
   // Try parent label
   const parentLabel = input.closest('label');
-  if (parentLabel) return parentLabel.innerText.trim();
+  if (parentLabel) {
+    const text = parentLabel.innerText.trim();
+    if (text) return text;
+  }
   
   // Try previous sibling label
   let prev = input.previousElementSibling;
-  if (prev && prev.tagName === 'LABEL') {
-    return prev.innerText.trim();
+  while (prev) {
+    if (prev.tagName === 'LABEL') {
+      return prev.innerText.trim();
+    }
+    if (prev.tagName === 'SPAN' || prev.tagName === 'DIV') {
+      const text = prev.innerText.trim();
+      if (text && text.length < 100) return text;
+    }
+    prev = prev.previousElementSibling;
   }
   
-  // Fallback to placeholder or name
-  return input.placeholder || input.name || 'Unknown';
+  // Try parent's previous sibling (common in form layouts)
+  const parent = input.parentElement;
+  if (parent) {
+    const parentPrev = parent.previousElementSibling;
+    if (parentPrev && (parentPrev.tagName === 'LABEL' || parentPrev.tagName === 'DIV')) {
+      const text = parentPrev.innerText.trim();
+      if (text && text.length < 100) return text;
+    }
+  }
+  
+  // Fallback to placeholder, name, or autocomplete
+  return input.placeholder || input.name || input.autocomplete || 'Unknown Field';
 }
 
-// Fill form with matched data
+// Fill form with matched data - IMPROVED
 function fillFormFields(matches) {
+  console.log('✍️ Starting to fill form...', matches);
   let filledCount = 0;
   
-  const inputs = document.querySelectorAll('input, textarea, select');
+  const inputs = document.querySelectorAll('input:not([type="hidden"]):not([type="submit"]):not([type="button"]), textarea, select');
   
   matches.forEach(match => {
     const input = inputs[match.fieldIndex];
     
     if (input && match.value) {
-      // Set value
-      input.value = match.value;
+      console.log(`Filling field ${match.fieldIndex}: ${match.value}`);
       
-      // Trigger change event (for React forms, etc.)
+      // Set value
+      const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+        window.HTMLInputElement.prototype,
+        'value'
+      ).set;
+      nativeInputValueSetter.call(input, match.value);
+      
+      // Trigger all necessary events for React/Angular/Vue forms
       input.dispatchEvent(new Event('input', { bubbles: true }));
       input.dispatchEvent(new Event('change', { bubbles: true }));
+      input.dispatchEvent(new Event('blur', { bubbles: true }));
       
       // Visual feedback
+      const originalBg = input.style.backgroundColor;
       input.style.backgroundColor = 'rgba(39, 174, 96, 0.2)';
+      input.style.transition = 'background-color 0.3s ease';
+      
       setTimeout(() => {
-        input.style.backgroundColor = '';
-      }, 1000);
+        input.style.backgroundColor = originalBg;
+      }, 1500);
       
       filledCount++;
     }
   });
   
+  console.log(`✅ Filled ${filledCount} fields`);
   return filledCount;
 }
 
-// Listen for form fill messages
+// UPDATE THE MESSAGE LISTENER
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  // ... existing code ...
+  console.log('📨 Content script received message:', request.action);
   
-  if (request.action === 'detectFormFields') {
-    console.log('📝 Detecting form fields...');
-    const fields = detectFormFields();
-    console.log(`✅ Detected ${fields.length} fields`);
-    sendResponse({ success: true, fields: fields });
+  try {
+    if (request.action === 'getPageContent') {
+      console.log('📄 Getting page content...');
+      const content = {
+        title: document.title,
+        url: window.location.href,
+        text: document.body.innerText.substring(0, 5000)
+      };
+      console.log('✅ Page content extracted:', content.text.length, 'chars');
+      sendResponse(content);
+      return true;
+    }
+    
+    if (request.action === 'getSelection') {
+      console.log('📝 Getting selected text...');
+      const selectedText = window.getSelection().toString().trim();
+      console.log('✅ Selected text:', selectedText.length, 'chars');
+      sendResponse({ 
+        text: selectedText,
+        url: window.location.href
+      });
+      return true;
+    }
+    
+    if (request.action === 'detectFormFields') {
+      console.log('📝 Detecting form fields...');
+      const fields = detectFormFields();
+      console.log(`✅ Detected ${fields.length} fields`);
+      sendResponse({ success: true, fields: fields });
+      return true;
+    }
+    
+    if (request.action === 'fillForm') {
+      console.log('✍️ Filling form...');
+      const filledCount = fillFormFields(request.matches);
+      console.log(`✅ Filled ${filledCount} fields`);
+      sendResponse({ success: true, filledCount: filledCount });
+      return true;
+    }
+    
+    if (request.action === 'toggleReadingMode') {
+      console.log('📖 Toggling reading mode...');
+      toggleReadingMode(request.fontSize, request.darkMode);
+      sendResponse({ success: true });
+      return true;
+    }
+    
+    if (request.action === 'updateReadingMode') {
+      console.log('📖 Updating reading mode settings...');
+      updateReadingModeSettings(request.fontSize, request.darkMode);
+      sendResponse({ success: true });
+      return true;
+    }
+    
+    if (request.action === 'highlightText') {
+      console.log('🎨 Highlight feature coming soon!');
+      sendResponse({ status: 'Feature coming soon!' });
+      return true;
+    }
+    
+    console.warn('⚠️ Unknown action:', request.action);
+    sendResponse({ error: 'Unknown action' });
+    return true;
+    
+  } catch (error) {
+    console.error('❌ Content script error:', error);
+    sendResponse({ error: error.message });
     return true;
   }
-  
-  if (request.action === 'fillForm') {
-    console.log('✍️ Filling form...');
-    const filledCount = fillFormFields(request.matches);
-    console.log(`✅ Filled ${filledCount} fields`);
-    sendResponse({ success: true, filledCount: filledCount });
-    return true;
-  }
-  
-  // ... rest of existing code ...
 });
+
+// Check if we're on YouTube
+if (window.location.hostname.includes('youtube.com')) {
+  console.log('🎥 YouTube detected! Special features available.');
+}
+
+console.log('✅ Content script ready and listening for messages');
+
+// Rest of the reading mode code stays the same...

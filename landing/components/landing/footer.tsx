@@ -3,11 +3,11 @@
 import { Github, FileText, Lock, CircleUserRound, Mail } from "lucide-react"
 
 const links = [
-  { label: "Documentation", href: "#", icon: FileText },
+  { label: "Documentation", href: "/docs/pdf/Documentation for BrowserBuddy AI.pdf", icon: FileText },
   { label: "GitHub", href: "https://github.com/rishhabhsingh", icon: Github },
   { label: "About the Developer", href: "#", icon: CircleUserRound },
   { label: "Contact", href: "https://www.linkedin.com/in/rishabh-singh-b13773225", icon: Mail },
-   { label: "Privacy Policy", href: "#", icon: Lock }
+   { label: "Privacy Policy", href: "/docs/pdf/Privacy Policy for BrowserBuddy AI.pdf", icon: Lock }
 ]
 
 export function Footer() {

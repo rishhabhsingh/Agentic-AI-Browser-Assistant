@@ -7,22 +7,31 @@ function ResumeOptimizer() {
   const [jobDescription, setJobDescription] = useState('');
   const [resumeText, setResumeText] = useState('');
   const [optimizing, setOptimizing] = useState(false);
+  const [generating, setGenerating] = useState(false);
   const [result, setResult] = useState(null);
 
-  const optimizeResume = async () => {
-    if (!jobDescription.trim() || !resumeText.trim()) {
-      alert('Please provide both job description and resume!');
+  const optimizeResume = async (generateTemplate = false) => {
+    if (!jobDescription.trim()) {
+      alert('Please provide a job description!');
       return;
     }
 
-    setOptimizing(true);
+    if (!generateTemplate && !resumeText.trim()) {
+      alert('Please provide your resume text!');
+      return;
+    }
+
+    const setLoading = generateTemplate ? setGenerating : setOptimizing;
+    setLoading(true);
+
     try {
       const response = await fetch(`${API_URL}/resume/optimize`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           jobDescription: jobDescription,
-          resumeText: resumeText
+          resumeText: resumeText || 'Generate new resume',
+          generateTemplate: generateTemplate
         })
       });
 
@@ -37,98 +46,156 @@ function ResumeOptimizer() {
       console.error('Error:', error);
       alert('Error! Make sure backend is running.');
     } finally {
-      setOptimizing(false);
+      setLoading(false);
     }
   };
 
-  const downloadDocx = () => {
+  const downloadResume = () => {
     if (result && result.downloadUrl) {
-      window.open(result.downloadUrl, '_blank');
+      const fullUrl = API_URL.replace('/api', '') + result.downloadUrl;
+      window.open(fullUrl, '_blank');
+    } else {
+      alert('No resume file available. Click "Generate Template" first!');
     }
+  };
+
+  const reset = () => {
+    setResult(null);
+    setJobDescription('');
+    setResumeText('');
   };
 
   return (
     <div className="resume-optimizer">
       <div className="ro-header">
         <h2>📄 Resume Optimizer</h2>
-        <p className="ro-subtitle">ATS-friendly resume creation</p>
+        <p className="ro-subtitle">ATS-friendly resume with AI</p>
       </div>
 
       {!result ? (
         <div className="ro-input">
           <div className="input-section">
-            <h4>📋 Job Description</h4>
+            <h4>📋 Job Description *</h4>
+            <p className="input-hint">Paste the complete job posting</p>
             <textarea
-              placeholder="Paste the job description here..."
+              placeholder="Paste job description here... (e.g., We are looking for a Software Engineer with experience in...)"
               value={jobDescription}
               onChange={(e) => setJobDescription(e.target.value)}
-              rows="6"
+              rows="8"
             />
           </div>
 
           <div className="input-section">
-            <h4>📝 Your Current Resume</h4>
+            <h4>📝 Your Current Resume (Optional)</h4>
+            <p className="input-hint">Paste your resume to analyze, or leave empty to generate template</p>
             <textarea
-              placeholder="Paste your resume text here..."
+              placeholder="Paste your current resume text here... (optional)"
               value={resumeText}
               onChange={(e) => setResumeText(e.target.value)}
               rows="8"
             />
           </div>
 
-          <button
-            className="optimize-btn"
-            onClick={optimizeResume}
-            disabled={optimizing}
-          >
-            {optimizing ? '🔄 Optimizing...' : '✨ Optimize Resume'}
-          </button>
+          <div className="ro-actions">
+            {resumeText.trim() ? (
+              <button
+                className="optimize-btn"
+                onClick={() => optimizeResume(false)}
+                disabled={optimizing || generating}
+              >
+                {optimizing ? '🔄 Analyzing...' : '🔍 Analyze My Resume'}
+              </button>
+            ) : null}
+
+            <button
+              className="generate-btn"
+              onClick={() => optimizeResume(true)}
+              disabled={optimizing || generating}
+            >
+              {generating ? '🔄 Generating...' : '✨ Generate ATS Template'}
+            </button>
+          </div>
 
           <div className="ro-info">
-            <h4>What this does:</h4>
+            <h4>💡 What this does:</h4>
             <ul>
-              <li>✅ Matches keywords from job description</li>
-              <li>✅ Creates ATS-friendly format</li>
-              <li>✅ Suggests improvements</li>
-              <li>✅ Generates downloadable .docx</li>
+              <li>✅ Extracts keywords from job description</li>
+              <li>✅ Calculates your match score</li>
+              <li>✅ Provides improvement suggestions</li>
+              <li>✅ Generates ATS-friendly .docx template</li>
+              <li>✅ Highlights missing keywords</li>
             </ul>
           </div>
         </div>
       ) : (
         <div className="ro-result">
           <div className="result-header">
-            <h4>✅ Optimization Complete!</h4>
-            <button onClick={() => setResult(null)}>← New Resume</button>
+            <h4>✅ Analysis Complete!</h4>
+            <button className="reset-btn" onClick={reset}>🔄 New Analysis</button>
           </div>
 
           <div className="match-score">
             <h4>Match Score</h4>
-            <div className="score-circle">
+            <div className={`score-circle ${result.matchScore >= 70 ? 'good' : result.matchScore >= 50 ? 'medium' : 'low'}`}>
               <span className="score">{result.matchScore}%</span>
+              <span className="score-label">
+                {result.matchScore >= 70 ? 'Great!' : result.matchScore >= 50 ? 'Good' : 'Needs Work'}
+              </span>
+            </div>
+          </div>
+
+          <div className="keywords-section">
+            <div className="matched-keywords">
+              <h4>✅ Matched Keywords ({result.matchedKeywords?.length})</h4>
+              <div className="keyword-tags">
+                {result.matchedKeywords?.map((kw, i) => (
+                  <span key={i} className="keyword-tag matched">{kw}</span>
+                ))}
+              </div>
+            </div>
+
+            <div className="missing-keywords">
+              <h4>⚠️ Missing Keywords ({result.missingKeywords?.length})</h4>
+              <div className="keyword-tags">
+                {result.missingKeywords?.map((kw, i) => (
+                  <span key={i} className="keyword-tag missing">{kw}</span>
+                ))}
+              </div>
+              <p className="hint">💡 Add these keywords to your resume!</p>
             </div>
           </div>
 
           <div className="suggestions">
-            <h4>💡 AI Suggestions</h4>
+            <h4>💡 AI Improvement Suggestions</h4>
             <div className="suggestion-text">
               {result.suggestions}
             </div>
           </div>
 
-          <div className="keywords">
-            <h4>🎯 Matched Keywords</h4>
-            <div className="keyword-tags">
-              {result.keywords?.map((kw, i) => (
-                <span key={i} className="keyword-tag">{kw}</span>
-              ))}
+          {result.downloadUrl && (
+            <div className="download-section">
+              <div className="download-info">
+                <h4>📥 Your ATS-Friendly Resume Template</h4>
+                <p>✨ Professional format optimized for Applicant Tracking Systems</p>
+                <p className="file-name">📄 {result.fileName}</p>
+              </div>
+              <button className="download-btn" onClick={downloadResume}>
+                📥 Download Resume (.docx)
+              </button>
+              <p className="download-hint">
+                ℹ️ Open in Microsoft Word or Google Docs to edit
+              </p>
             </div>
-          </div>
+          )}
 
-          <div className="download-section">
-            <button className="download-btn" onClick={downloadDocx}>
-              📥 Download Optimized Resume (.docx)
-            </button>
-          </div>
+          {!result.downloadUrl && (
+            <div className="no-template">
+              <p>💡 Want an ATS-friendly template?</p>
+              <button className="generate-btn" onClick={() => optimizeResume(true)}>
+                ✨ Generate Template Now
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>
