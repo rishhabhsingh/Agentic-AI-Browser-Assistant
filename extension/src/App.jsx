@@ -162,16 +162,12 @@ function App() {
             📝 Content Simplifier
           </button>
           
-          <div className="section">
-          <h3>🎥 Experimental</h3>
           <button 
             className="action-btn experimental" 
             onClick={() => setActiveView('youtube')}
           >
             🎥 YouTube Summary
-            <span className="beta-badge">BETA</span>
           </button>
-        </div>
 
           <button 
             className="action-btn" 
@@ -198,17 +194,14 @@ function App() {
           </button>
       </div>
 
-          <div className="section">
-      <h3>🎥 Experimental</h3>
+
           <button 
             className="action-btn experimental" 
             onClick={() => setActiveView('resume')}
           >
             📄 Resume Optimizer
-            <span className="beta-badge">BETA</span>
           </button>
-      </div>
-        </div>
+
 
        <div className="section">
           <h3>⚙️ Settings</h3>
@@ -226,7 +219,7 @@ function App() {
         <p className="version">v1.0.0 • Powered by Groq AI</p>
       </footer>
     </div>
+    </div>
   );
 }
-
 export default App;

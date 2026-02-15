@@ -1,169 +1,123 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import './ReadingMode.css';
 
 function ReadingMode() {
-  const [isActive, setIsActive] = useState(false);
   const [fontSize, setFontSize] = useState(16);
-  const [darkMode, setDarkMode] = useState(false);
-  const [currentUrl, setCurrentUrl] = useState('');
+  const [theme, setTheme] = useState('light');
+  const [isActive, setIsActive] = useState(false);
 
-  useEffect(() => {
-    // Get current tab URL
+  const enableReadingMode = () => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (tabs[0]) {
-        setCurrentUrl(tabs[0].url);
-      }
-    });
-  }, []);
-
-  const toggleReadingMode = () => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      chrome.tabs.sendMessage(
-        tabs[0].id,
-        { 
-          action: 'toggleReadingMode',
-          fontSize: fontSize,
-          darkMode: darkMode
-        },
-        (response) => {
-          if (chrome.runtime.lastError) {
-            alert('Error: Please refresh the page first!');
-            return;
-          }
-          
-          if (response && response.success) {
-            setIsActive(!isActive);
-          }
-        }
-      );
-    });
-  };
-
-  const updateSettings = () => {
-    if (isActive) {
-      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         chrome.tabs.sendMessage(
           tabs[0].id,
-          { 
-            action: 'updateReadingMode',
+          {
+            action: 'enableReadingMode',
             fontSize: fontSize,
-            darkMode: darkMode
+            theme: theme
+          },
+          (response) => {
+            if (chrome.runtime.lastError) {
+              console.error('Error:', chrome.runtime.lastError);
+              alert('Please refresh the page and try again');
+            } else if (response && response.success) {
+              setIsActive(true);
+            }
           }
         );
-      });
-    }
+      }
+    });
   };
 
-  useEffect(() => {
-    updateSettings();
-  }, [fontSize, darkMode]);
-
-  const canUseReadingMode = () => {
-    // Check if URL is readable (not Chrome pages, PDFs, etc.)
-    if (!currentUrl) return false;
-    if (currentUrl.startsWith('chrome://')) return false;
-    if (currentUrl.startsWith('chrome-extension://')) return false;
-    if (currentUrl.endsWith('.pdf')) return false;
-    return true;
+  const disableReadingMode = () => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs[0]) {
+        chrome.tabs.sendMessage(
+          tabs[0].id,
+          { action: 'disableReadingMode' },
+          (response) => {
+            if (response && response.success) {
+              setIsActive(false);
+            }
+          }
+        );
+      }
+    });
   };
 
   return (
     <div className="reading-mode">
-      <div className="rm-header">
-        <h2>📖 Smart Reading Mode</h2>
-        <p className="rm-subtitle">Distraction-free reading experience</p>
+      <div className="reading-header">
+        <h2>📖 Reading Mode</h2>
+        <p className="reading-subtitle">Distraction-free reading</p>
       </div>
 
-      {canUseReadingMode() ? (
-        <>
-          {/* Toggle Button */}
-          <div className="rm-toggle">
+      <div className="reading-controls">
+        <div className="control-group">
+          <label>Font Size: {fontSize}px</label>
+          <div className="font-size-controls">
             <button 
-              className={`toggle-btn ${isActive ? 'active' : ''}`}
-              onClick={toggleReadingMode}
+              className="font-btn"
+              onClick={() => setFontSize(Math.max(12, fontSize - 2))}
             >
-              {isActive ? '✅ Reading Mode ON' : '📖 Enable Reading Mode'}
+              A-
+            </button>
+            <input
+              type="range"
+              min="12"
+              max="24"
+              value={fontSize}
+              onChange={(e) => setFontSize(parseInt(e.target.value))}
+              className="font-slider"
+            />
+            <button 
+              className="font-btn"
+              onClick={() => setFontSize(Math.min(24, fontSize + 2))}
+            >
+              A+
             </button>
           </div>
+        </div>
 
-          {/* Settings */}
-          <div className="rm-settings">
-            <div className="setting-group">
-              <h4>🔤 Font Size</h4>
-              <div className="font-controls">
-                <button 
-                  className="font-btn"
-                  onClick={() => setFontSize(Math.max(12, fontSize - 2))}
-                >
-                  A-
-                </button>
-                <span className="font-value">{fontSize}px</span>
-                <button 
-                  className="font-btn"
-                  onClick={() => setFontSize(Math.min(24, fontSize + 2))}
-                >
-                  A+
-                </button>
-              </div>
-              <input 
-                type="range" 
-                min="12" 
-                max="24" 
-                value={fontSize}
-                onChange={(e) => setFontSize(parseInt(e.target.value))}
-                className="font-slider"
-              />
-            </div>
-
-            <div className="setting-group">
-              <h4>🌙 Theme</h4>
-              <div className="theme-toggle">
-                <button 
-                  className={`theme-btn ${!darkMode ? 'active' : ''}`}
-                  onClick={() => setDarkMode(false)}
-                >
-                  ☀️ Light
-                </button>
-                <button 
-                  className={`theme-btn ${darkMode ? 'active' : ''}`}
-                  onClick={() => setDarkMode(true)}
-                >
-                  🌙 Dark
-                </button>
-              </div>
-            </div>
+        <div className="control-group">
+          <label>Theme</label>
+          <div className="theme-buttons">
+            <button
+              className={`theme-btn ${theme === 'light' ? 'active' : ''}`}
+              onClick={() => setTheme('light')}
+            >
+              ☀️ Light
+            </button>
+            <button
+              className={`theme-btn ${theme === 'dark' ? 'active' : ''}`}
+              onClick={() => setTheme('dark')}
+            >
+              🌙 Dark
+            </button>
           </div>
+        </div>
 
-          {/* Features List */}
-          <div className="features-list">
-            <h4>✨ What it does:</h4>
-            <ul>
-              <li>✅ Removes ads and popups</li>
-              <li>✅ Hides sidebars and navigation</li>
-              <li>✅ Focuses on main content</li>
-              <li>✅ Adjustable font size</li>
-              <li>✅ Light/Dark mode</li>
-            </ul>
-          </div>
+        {!isActive ? (
+          <button className="enable-btn" onClick={enableReadingMode}>
+            📖 Enable Reading Mode
+          </button>
+        ) : (
+          <button className="disable-btn" onClick={disableReadingMode}>
+            ✕ Exit Reading Mode
+          </button>
+        )}
+      </div>
 
-          {/* Current Page Info */}
-          <div className="page-info">
-            <h4>📄 Current Page:</h4>
-            <div className="url-display">
-              {new URL(currentUrl).hostname}
-            </div>
-          </div>
-        </>
-      ) : (
-        <div className="rm-unavailable">
-          <p>❌ Reading mode not available for this page</p>
-          <p className="hint">
-            Works best on:<br/>
-            • News articles<br/>
-            • Blog posts<br/>
-            • Wikipedia<br/>
-            • Medium articles
-          </p>
+      {!isActive && (
+        <div className="reading-info">
+          <h4>What gets removed:</h4>
+          <ul>
+            <li>✓ Advertisements</li>
+            <li>✓ Sidebars</li>
+            <li>✓ Pop-ups</li>
+            <li>✓ Navigation menus</li>
+          </ul>
+          <p className="hint">📌 Open an article or blog post, then enable reading mode</p>
         </div>
       )}
     </div>

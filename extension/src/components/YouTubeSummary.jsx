@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import './YouTubeSummary.css';
 
-const API_URL = 'https://agentic-ai-browser-assistant.onrender.com';
+const API_URL = 'https://browser-buddy-backend.onrender.com/api';
 
 function YouTubeSummary() {
   const [videoUrl, setVideoUrl] = useState('');

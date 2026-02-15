@@ -80,230 +80,184 @@ if (window.location.hostname.includes('youtube.com')) {
 
 console.log('✅ Content script ready and listening for messages')
 
-// ============================================
-// READING MODE FUNCTIONS
-// ============================================
-
+// ==================== READING MODE ====================
 let readingModeActive = false;
-let originalHTML = '';
+let originalContent = null;
 
-function toggleReadingMode(fontSize, darkMode) {
-  if (!readingModeActive) {
-    enableReadingMode(fontSize, darkMode);
-  } else {
-    disableReadingMode();
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === 'enableReadingMode') {
+    enableReadingMode(request.fontSize, request.theme);
+    sendResponse({ success: true });
+    return true;
   }
-}
+  
+  if (request.action === 'disableReadingMode') {
+    disableReadingMode();
+    sendResponse({ success: true });
+    return true;
+  }
+});
 
-function enableReadingMode(fontSize, darkMode) {
-  console.log('📖 Enabling reading mode...');
-  
-  // Save original HTML
-  originalHTML = document.body.innerHTML;
-  
-  // Extract main content
-  const mainContent = extractMainContent();
-  
-  if (!mainContent) {
-    alert('Could not extract main content from this page!');
+function enableReadingMode(fontSize, theme) {
+  if (readingModeActive) return;
+
+  // Save original content
+  originalContent = {
+    bodyHTML: document.body.innerHTML,
+    bodyStyle: document.body.style.cssText,
+    htmlStyle: document.documentElement.style.cssText
+  };
+
+  // Find main content
+  const article = document.querySelector('article') || 
+                  document.querySelector('[role="main"]') || 
+                  document.querySelector('main') ||
+                  document.querySelector('.post-content') ||
+                  document.querySelector('.article-content') ||
+                  document.querySelector('.entry-content') ||
+                  document.querySelector('#content');
+
+  if (!article) {
+    alert('Could not find main content on this page. Try a different page.');
     return;
   }
-  
+
+  // Extract content
+  const title = document.querySelector('h1') || document.querySelector('title');
+  const titleText = title ? title.textContent : '';
+
   // Create reading mode container
   const container = document.createElement('div');
-  container.id = 'browserbuddy-reading-mode';
+  container.id = 'reading-mode-container';
   container.innerHTML = `
     <div class="reading-mode-header">
-      <h1>${document.title}</h1>
+      <h1>${titleText}</h1>
       <button id="exit-reading-mode">✕ Exit Reading Mode</button>
     </div>
     <div class="reading-mode-content">
-      ${mainContent}
+      ${article.innerHTML}
     </div>
   `;
-  
-  // Apply styles
-  applyReadingModeStyles(fontSize, darkMode);
-  
-  // Replace body content
+
+  // Clear body and add container
   document.body.innerHTML = '';
   document.body.appendChild(container);
+
+  // Apply styles
+  const bgColor = theme === 'dark' ? '#1a1a1a' : '#ffffff';
+  const textColor = theme === 'dark' ? '#e0e0e0' : '#333333';
+
+  const style = document.createElement('style');
+  style.id = 'reading-mode-styles';
+  style.textContent = `
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      background: ${bgColor} !important;
+      color: ${textColor} !important;
+      font-family: Georgia, 'Times New Roman', serif !important;
+      line-height: 1.8 !important;
+      overflow-y: auto !important;
+    }
+    
+    #reading-mode-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+    
+    .reading-mode-header {
+      margin-bottom: 40px;
+      border-bottom: 2px solid ${theme === 'dark' ? '#333' : '#ddd'};
+      padding-bottom: 20px;
+    }
+    
+    .reading-mode-header h1 {
+      font-size: ${fontSize + 8}px !important;
+      margin-bottom: 20px;
+      color: ${textColor} !important;
+    }
+    
+    #exit-reading-mode {
+      background: ${theme === 'dark' ? '#333' : '#f0f0f0'};
+      color: ${textColor};
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    
+    #exit-reading-mode:hover {
+      background: ${theme === 'dark' ? '#444' : '#e0e0e0'};
+    }
+    
+    .reading-mode-content {
+      font-size: ${fontSize}px !important;
+      color: ${textColor} !important;
+    }
+    
+    .reading-mode-content p {
+      margin-bottom: 1.5em !important;
+      line-height: 1.8 !important;
+    }
+    
+    .reading-mode-content h2,
+    .reading-mode-content h3,
+    .reading-mode-content h4 {
+      margin-top: 2em !important;
+      margin-bottom: 1em !important;
+      color: ${textColor} !important;
+    }
+    
+    .reading-mode-content img {
+      max-width: 100% !important;
+      height: auto !important;
+      margin: 2em 0 !important;
+    }
+    
+    .reading-mode-content a {
+      color: ${theme === 'dark' ? '#6db3f2' : '#0066cc'} !important;
+      text-decoration: underline;
+    }
+    
+    .reading-mode-content blockquote {
+      border-left: 4px solid ${theme === 'dark' ? '#555' : '#ccc'};
+      padding-left: 20px;
+      margin: 1.5em 0;
+      font-style: italic;
+    }
+  `;
   
-  // Add exit button listener
+  document.head.appendChild(style);
+
+  // Add exit button handler
   document.getElementById('exit-reading-mode').addEventListener('click', disableReadingMode);
-  
+
   readingModeActive = true;
   console.log('✅ Reading mode enabled');
 }
 
 function disableReadingMode() {
-  console.log('📖 Disabling reading mode...');
-  
-  // Remove reading mode styles
-  const style = document.getElementById('browserbuddy-rm-styles');
-  if (style) style.remove();
-  
-  // Restore original HTML
-  document.body.innerHTML = originalHTML;
-  
+  if (!readingModeActive || !originalContent) return;
+
+  // Remove styles
+  const styles = document.getElementById('reading-mode-styles');
+  if (styles) styles.remove();
+
+  // Restore original content
+  document.body.innerHTML = originalContent.bodyHTML;
+  document.body.style.cssText = originalContent.bodyStyle;
+  document.documentElement.style.cssText = originalContent.htmlStyle;
+
   readingModeActive = false;
+  originalContent = null;
   console.log('✅ Reading mode disabled');
-}
-
-function updateReadingModeSettings(fontSize, darkMode) {
-  if (readingModeActive) {
-    applyReadingModeStyles(fontSize, darkMode);
-  }
-}
-
-function extractMainContent() {
-  // Try to find main content
-  let content = null;
-  
-  // Common selectors for main content
-  const selectors = [
-    'article',
-    'main',
-    '[role="main"]',
-    '.post-content',
-    '.article-content',
-    '.entry-content',
-    '.content',
-    '#content',
-    '.mw-parser-output' // Wikipedia
-  ];
-  
-  for (const selector of selectors) {
-    content = document.querySelector(selector);
-    if (content && content.innerText.length > 500) {
-      return content.innerHTML;
-    }
-  }
-  
-  // Fallback: get all paragraphs
-  const paragraphs = Array.from(document.querySelectorAll('p'));
-  if (paragraphs.length > 5) {
-    return paragraphs.map(p => p.outerHTML).join('');
-  }
-  
-  return null;
-}
-
-function applyReadingModeStyles(fontSize, darkMode) {
-  // Remove existing styles if any
-  const existing = document.getElementById('browserbuddy-rm-styles');
-  if (existing) existing.remove();
-  
-  const style = document.createElement('style');
-  style.id = 'browserbuddy-rm-styles';
-  
-  const bgColor = darkMode ? '#1a1a1a' : '#ffffff';
-  const textColor = darkMode ? '#e0e0e0' : '#333333';
-  const headerBg = darkMode ? '#2a2a2a' : '#f5f5f5';
-  
-  style.textContent = `
-    #browserbuddy-reading-mode {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: ${bgColor};
-      color: ${textColor};
-      overflow-y: auto;
-      z-index: 999999;
-      font-family: Georgia, 'Times New Roman', serif;
-    }
-    
-    .reading-mode-header {
-      position: sticky;
-      top: 0;
-      background: ${headerBg};
-      padding: 20px;
-      border-bottom: 1px solid ${darkMode ? '#333' : '#ddd'};
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      z-index: 1000000;
-    }
-    
-    .reading-mode-header h1 {
-      margin: 0;
-      font-size: 24px;
-      color: ${textColor};
-      flex: 1;
-    }
-    
-    #exit-reading-mode {
-      padding: 10px 20px;
-      background: #e74c3c;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 600;
-      transition: all 0.3s ease;
-    }
-    
-    #exit-reading-mode:hover {
-      background: #c0392b;
-      transform: scale(1.05);
-    }
-    
-    .reading-mode-content {
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 40px 20px;
-      line-height: 1.8;
-      font-size: ${fontSize}px;
-    }
-    
-    .reading-mode-content p {
-      margin-bottom: 1.5em;
-      line-height: 1.8;
-    }
-    
-    .reading-mode-content h1,
-    .reading-mode-content h2,
-    .reading-mode-content h3 {
-      margin-top: 1.5em;
-      margin-bottom: 0.5em;
-      color: ${textColor};
-    }
-    
-    .reading-mode-content a {
-      color: ${darkMode ? '#64b5f6' : '#2980b9'};
-      text-decoration: none;
-      border-bottom: 1px solid currentColor;
-    }
-    
-    .reading-mode-content img {
-      max-width: 100%;
-      height: auto;
-      margin: 20px 0;
-      border-radius: 8px;
-    }
-    
-    .reading-mode-content blockquote {
-      border-left: 4px solid ${darkMode ? '#555' : '#ddd'};
-      padding-left: 20px;
-      margin: 20px 0;
-      font-style: italic;
-      opacity: 0.9;
-    }
-    
-    /* Hide ads and other junk */
-    .reading-mode-content [class*="ad"],
-    .reading-mode-content [id*="ad"],
-    .reading-mode-content iframe,
-    .reading-mode-content .sidebar,
-    .reading-mode-content nav {
-      display: none !important;
-    }
-  `;
-  
-  document.head.appendChild(style);
 }
 
 // ============================================
