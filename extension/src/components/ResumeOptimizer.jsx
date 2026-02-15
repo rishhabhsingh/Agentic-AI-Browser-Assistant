@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import './ResumeOptimizer.css';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'https://agentic-ai-browser-assistant.onrender.com';
 
 function ResumeOptimizer() {
   const [jobDescription, setJobDescription] = useState('');

@@ -1,6 +1,6 @@
 const { getGroqCompletion } = require('../utils/groqHelper');
 
-// Simple YouTube analysis without transcript
+// Analyze YouTube video based on metadata
 exports.analyzeVideo = async (req, res) => {
   try {
     const { videoId, url, title, description } = req.body;
@@ -14,53 +14,72 @@ exports.analyzeVideo = async (req, res) => {
       });
     }
 
-    // Since we can't get transcript reliably, use title/description
-    const videoInfo = title || 'YouTube Video';
-    const videoDesc = description || 'No description available';
+    const videoTitle = title || 'YouTube Video';
+    const videoDesc = description || '';
 
     console.log('📝 Analyzing video metadata...');
 
-    // Generate summary from title and description
-    const systemPrompt = "You are a helpful assistant that analyzes YouTube videos.";
+    // Generate AI summary from title and description
+    const systemPrompt = "You are a helpful YouTube video analyst. Provide concise, useful information.";
 
-    const userPrompt = `Based on this YouTube video information, provide a helpful summary:
+    const userPrompt = `Analyze this YouTube video and provide:
 
-Title: ${videoInfo}
+Title: ${videoTitle}
 Description: ${videoDesc}
 URL: ${url}
 
-Provide:
-1. **What this video is likely about** (2-3 sentences)
-2. **Key topics** (3-5 bullet points based on title/description)
-3. **Who should watch** (target audience)
+Generate:
+1. **Summary** (2-3 sentences about what this video covers)
+2. **Key Topics** (4-6 main topics as bullet points)
+3. **Estimated Timestamps/Chapters** (Create 5 logical timestamp suggestions based on typical video structure)
+   Format: [0:00] Intro, [2:30] Topic 1, etc.
+4. **Target Audience** (Who should watch this)
 
-Be helpful and informative.`;
+Be specific and helpful based on the title and description.`;
 
-    let summary;
+    let analysis;
     try {
-      summary = await getGroqCompletion(systemPrompt, userPrompt, {
+      analysis = await getGroqCompletion(systemPrompt, userPrompt, {
         temperature: 0.6,
-        maxTokens: 500,
+        maxTokens: 800,
         model: "llama-3.3-70b-versatile"
       });
     } catch (error) {
-      summary = `**About this video:**\n${videoInfo}\n\n**Description:**\n${videoDesc}`;
+      console.error('AI analysis failed:', error.message);
+      analysis = `**Summary:**\n${videoTitle}\n\n**Description:**\n${videoDesc}\n\nAI analysis unavailable. Watch the video for full content.`;
     }
 
-    console.log('✅ Summary generated');
+    // Extract suggested timestamps from AI response
+    const timestampMatches = analysis.match(/\[(\d+:\d+)\]\s*([^\n]+)/g) || [];
+    const suggestedChapters = timestampMatches.map(match => {
+      const parts = match.match(/\[(\d+:\d+)\]\s*(.+)/);
+      if (parts) {
+        const time = parts[1].split(':');
+        const seconds = parseInt(time[0]) * 60 + parseInt(time[1]);
+        return {
+          timestamp: parts[1],
+          seconds: seconds,
+          title: parts[2].trim()
+        };
+      }
+      return null;
+    }).filter(Boolean);
+
+    console.log('✅ Analysis complete');
 
     res.json({
       success: true,
       videoId: videoId,
       url: url,
       videoInfo: {
-        title: videoInfo,
+        title: videoTitle,
         description: videoDesc
       },
-      summary: summary,
-      note: 'Summary based on video metadata (transcript not available)',
+      summary: analysis,
+      suggestedChapters: suggestedChapters,
+      note: 'Analysis based on video title and description. Timestamps are AI-suggested based on typical video structure.',
       stats: {
-        available: false
+        chaptersGenerated: suggestedChapters.length
       }
     });
 

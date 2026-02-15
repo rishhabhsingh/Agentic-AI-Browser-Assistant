@@ -12,7 +12,7 @@ const SettingsSchema = new mongoose.Schema({
     theme: {
       type: String,
       enum: ['light', 'dark', 'auto'],
-      default: 'auto'
+      default: 'dark'
     },
     fontSize: {
       type: Number,

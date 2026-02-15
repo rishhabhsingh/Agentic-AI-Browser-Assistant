@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react';
 import './YouTubeSummary.css';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'https://agentic-ai-browser-assistant.onrender.com';
 
 function YouTubeSummary() {
   const [videoUrl, setVideoUrl] = useState('');
   const [videoId, setVideoId] = useState('');
+  const [videoTitle, setVideoTitle] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
-  const [activeTab, setActiveTab] = useState('summary'); // summary, transcript, moments
+  const [activeTab, setActiveTab] = useState('summary');
 
   useEffect(() => {
     // Check if current tab is YouTube
@@ -19,82 +20,71 @@ function YouTubeSummary() {
         if (id) {
           setVideoUrl(tabs[0].url);
           setVideoId(id);
+          setVideoTitle(tabs[0].title.replace(' - YouTube', ''));
         }
       }
     });
   }, []);
 
   const analyzeVideo = async () => {
-  if (!videoId) {
-    alert('Please open a YouTube video first!');
-    return;
-  }
-
-  setLoading(true);
-  setResult(null);
-
-  try {
-    // Get video title from page
-    const videoTitle = document.querySelector('h1.ytd-video-primary-info-renderer')?.innerText ||
-                      document.querySelector('[class*="title"]')?.innerText ||
-                      'YouTube Video';
-
-    console.log('Analyzing video:', videoId, videoTitle);
-
-    const response = await fetch(`${API_URL}/youtube/analyze`, {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify({
-        videoId: videoId,
-        url: videoUrl,
-        title: videoTitle,
-        description: ''
-      })
-    });
-
-    const data = await response.json();
-
-    if (data.success) {
-      setResult(data);
-      setActiveTab('summary');
-    } else {
-      alert('Analysis failed: ' + (data.message || 'Unknown error'));
+    if (!videoId) {
+      alert('Please open a YouTube video first!');
+      return;
     }
-  } catch (error) {
-    console.error('Error:', error);
-    alert('Error! Make sure backend is running.');
-  } finally {
-    setLoading(false);
-  }
-};
 
-  const copyTranscript = () => {
-    if (result && result.transcript) {
-      navigator.clipboard.writeText(result.transcript.formatted);
-      alert('✅ Transcript copied to clipboard!');
+    setLoading(true);
+    setResult(null);
+
+    try {
+      console.log('Analyzing video:', videoId);
+
+      const response = await fetch(`${API_URL}/youtube/analyze`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          videoId: videoId,
+          url: videoUrl,
+          title: videoTitle,
+          description: ''
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setResult(data);
+        setActiveTab('summary');
+      } else {
+        alert('Analysis failed: ' + (data.message || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error! Make sure backend is running.');
+    } finally {
+      setLoading(false);
     }
   };
 
   const jumpToTimestamp = (seconds) => {
-    // This would need to interact with the YouTube player
-    // For now, just show the timestamp
-    alert(`Jump to ${Math.floor(seconds / 60)}:${(seconds % 60).toString().padStart(2, '0')}`);
+    // Open YouTube video at specific timestamp
+    const timestampUrl = `${videoUrl}&t=${seconds}s`;
+    chrome.tabs.update({ url: timestampUrl });
   };
 
   return (
     <div className="youtube-summary">
       <div className="yt-header">
-        <h2>🎥 YouTube Summary</h2>
-        <p className="yt-subtitle">Get AI-powered video summaries</p>
+        <h2>🎥 YouTube Analyzer</h2>
+        <p className="yt-subtitle">AI-powered video insights</p>
       </div>
 
-      {/* Current Video */}
       {videoId ? (
         <div className="current-video">
           <h4>📺 Current Video</h4>
+          <div className="video-title">{videoTitle}</div>
           <div className="video-id">ID: {videoId}</div>
           <button 
             className="analyze-btn"
@@ -111,7 +101,6 @@ function YouTubeSummary() {
         </div>
       )}
 
-      {/* Results */}
       {result && (
         <div className="results">
           {/* Tab Navigation */}
@@ -123,82 +112,76 @@ function YouTubeSummary() {
               📝 Summary
             </button>
             <button 
-              className={`tab-btn ${activeTab === 'transcript' ? 'active' : ''}`}
-              onClick={() => setActiveTab('transcript')}
+              className={`tab-btn ${activeTab === 'chapters' ? 'active' : ''}`}
+              onClick={() => setActiveTab('chapters')}
             >
-              📄 Transcript
-            </button>
-            <button 
-              className={`tab-btn ${activeTab === 'moments' ? 'active' : ''}`}
-              onClick={() => setActiveTab('moments')}
-            >
-              ⏱️ Key Moments
+              ⏱️ Chapters ({result.suggestedChapters?.length || 0})
             </button>
           </div>
 
           {/* Summary Tab */}
           {activeTab === 'summary' && (
-  <div className="summary-content">
-    <div className="stats-bar">
-      <span>ℹ️ Analysis based on video metadata</span>
-    </div>
-    <div className="summary-text">
-      {result.summary}
-    </div>
-    {result.note && (
-      <div className="note-box">
-        💡 {result.note}
-      </div>
-    )}
-  </div>
-)}
-
-          {/* Transcript Tab */}
-          {activeTab === 'transcript' && (
-            <div className="transcript-content">
-              <div className="transcript-header">
-                <h4>Full Transcript</h4>
-                <button className="copy-btn" onClick={copyTranscript}>
-                  📋 Copy
-                </button>
+            <div className="summary-content">
+              <div className="stats-bar">
+                <span>ℹ️ AI-generated analysis</span>
+                <span>📊 {result.stats?.chaptersGenerated || 0} chapters</span>
               </div>
-              <div className="transcript-text">
-                {result.transcript.formatted}
+              <div className="summary-text">
+                {result.summary}
               </div>
+              {result.note && (
+                <div className="note-box">
+                  💡 {result.note}
+                </div>
+              )}
             </div>
           )}
 
-          {/* Key Moments Tab */}
-          {activeTab === 'moments' && (
-            <div className="moments-content">
-              <h4>🎯 Key Moments</h4>
-              <div className="moments-list">
-                {result.keyMoments.map((moment, index) => (
-                  <div key={index} className="moment-item">
-                    <button 
-                      className="timestamp-btn"
-                      onClick={() => jumpToTimestamp(moment.timestamp)}
-                    >
-                      {moment.formatted}
-                    </button>
-                    <div className="moment-text">{moment.text}</div>
-                  </div>
-                ))}
+          {/* Chapters Tab */}
+          {activeTab === 'chapters' && (
+            <div className="chapters-content">
+              <h4>🎯 Suggested Chapters/Timestamps</h4>
+              {result.suggestedChapters && result.suggestedChapters.length > 0 ? (
+                <div className="chapters-list">
+                  {result.suggestedChapters.map((chapter, index) => (
+                    <div key={index} className="chapter-item">
+                      <button 
+                        className="timestamp-btn"
+                        onClick={() => jumpToTimestamp(chapter.seconds)}
+                        title="Click to jump to this timestamp"
+                      >
+                        {chapter.timestamp}
+                      </button>
+                      <div className="chapter-text">{chapter.title}</div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="no-chapters">
+                  <p>No timestamps available</p>
+                  <p className="hint">AI couldn't generate chapter suggestions from video metadata</p>
+                </div>
+              )}
+              <div className="chapters-note">
+                💡 Timestamps are AI-suggested based on typical video structure. Click any timestamp to jump to that point in the video.
               </div>
             </div>
           )}
         </div>
       )}
 
-      {/* Instructions */}
       {!result && !loading && videoId && (
         <div className="instructions">
           <h4>How it works:</h4>
           <ol>
-            <li>Make sure video has captions/subtitles</li>
-            <li>Click "Analyze Video"</li>
-            <li>Get instant AI summary + transcript</li>
+            <li>AI analyzes the video title and description</li>
+            <li>Generates summary of video content</li>
+            <li>Suggests logical chapter timestamps</li>
+            <li>Click timestamps to navigate video</li>
           </ol>
+          <div className="beta-notice">
+            ⚠️ <strong>Note:</strong> This is a metadata-based analysis. For best results, videos should have detailed descriptions.
+          </div>
         </div>
       )}
     </div>
