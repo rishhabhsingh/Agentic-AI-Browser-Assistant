@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import './ContentSimplifier.css';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'https://agentic-ai-browser-assistant.onrender.com';
 
 function ContentSimplifier() {
   const [selectedText, setSelectedText] = useState('');
