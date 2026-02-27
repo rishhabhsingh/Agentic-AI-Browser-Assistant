@@ -5,83 +5,84 @@ exports.analyzeVideo = async (req, res) => {
   try {
     const { videoId, url, title, description } = req.body;
 
-    console.log(`🎥 YouTube Analysis Request - Video ID: ${videoId}`);
-
     if (!videoId) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide a video ID'
+        message: 'Video ID is required'
       });
     }
 
-    const videoTitle = title || 'YouTube Video';
-    const videoDesc = description || '';
+    console.log(`🎥 Analyzing YouTube video: ${videoId}`);
 
-    console.log('📝 Analyzing video metadata...');
+    // IMPROVED PROMPT - NoteGPT Style
+    const systemPrompt = `You are an expert video analyst specializing in creating comprehensive summaries and chapter breakdowns. Your goal is to provide maximum value to users who want to understand video content quickly without watching the entire video.`;
 
-    // Generate AI summary from title and description
-    const systemPrompt = "You are a helpful YouTube video analyst. Provide concise, useful information.";
+    const userPrompt = `Analyze this YouTube video and create a detailed summary:
 
-    const userPrompt = `Analyze this YouTube video and provide:
-
-Title: ${videoTitle}
-Description: ${videoDesc}
+VIDEO INFORMATION:
+Title: ${title || 'Unknown'}
 URL: ${url}
+Description: ${description ? description.substring(0, 1000) : 'No description available'}
 
-Generate:
-1. **Summary** (2-3 sentences about what this video covers)
-2. **Key Topics** (4-6 main topics as bullet points)
-3. **Estimated Timestamps/Chapters** (Create 5 logical timestamp suggestions based on typical video structure)
-   Format: [0:00] Intro, [2:30] Topic 1, etc.
-4. **Target Audience** (Who should watch this)
+INSTRUCTIONS:
+1. Create a comprehensive 3-4 sentence summary capturing the MAIN TOPIC and KEY TAKEAWAYS
+2. Generate 6-10 chapter titles that would logically divide this video
+3. For each chapter, provide:
+   - A descriptive title (not generic like "Introduction")
+   - Estimated timestamp (spread evenly across video)
+   - 1-2 sentence description of what's covered
+4. List 5-7 KEY POINTS or main ideas from the video
+5. Identify the TARGET AUDIENCE (who would benefit from this video)
 
-Be specific and helpful based on the title and description.`;
+CHAPTER GUIDELINES:
+- Be SPECIFIC and DESCRIPTIVE (e.g., "Setting up React development environment" not "Setup")
+- Make chapters actionable (what the viewer will learn/do)
+- Cover the full arc of the video (beginning, middle, end)
+- Each chapter should be substantial (2-5 minutes worth of content)
 
-    let analysis;
-    try {
-      analysis = await getGroqCompletion(systemPrompt, userPrompt, {
-        temperature: 0.6,
-        maxTokens: 800,
-        model: "llama-3.3-70b-versatile"
-      });
-    } catch (error) {
-      console.error('AI analysis failed:', error.message);
-      analysis = `**Summary:**\n${videoTitle}\n\n**Description:**\n${videoDesc}\n\nAI analysis unavailable. Watch the video for full content.`;
+Return ONLY valid JSON in this EXACT format:
+{
+  "summary": "2-3 sentence comprehensive summary here",
+  "chapters": [
+    {
+      "timestamp": "0:00",
+      "title": "Specific descriptive title",
+      "description": "What's covered in this section"
     }
+  ],
+  "keyPoints": [
+    "Key point 1",
+    "Key point 2"
+  ],
+  "targetAudience": "Who this video is for"
+}`;
 
-    // Extract suggested timestamps from AI response
-    const timestampMatches = analysis.match(/\[(\d+:\d+)\]\s*([^\n]+)/g) || [];
-    const suggestedChapters = timestampMatches.map(match => {
-      const parts = match.match(/\[(\d+:\d+)\]\s*(.+)/);
-      if (parts) {
-        const time = parts[1].split(':');
-        const seconds = parseInt(time[0]) * 60 + parseInt(time[1]);
-        return {
-          timestamp: parts[1],
-          seconds: seconds,
-          title: parts[2].trim()
-        };
-      }
-      return null;
-    }).filter(Boolean);
-
-    console.log('✅ Analysis complete');
-
-    res.json({
-      success: true,
-      videoId: videoId,
-      url: url,
-      videoInfo: {
-        title: videoTitle,
-        description: videoDesc
-      },
-      summary: analysis,
-      suggestedChapters: suggestedChapters,
-      note: 'Analysis based on video title and description. Timestamps are AI-suggested based on typical video structure.',
-      stats: {
-        chaptersGenerated: suggestedChapters.length
-      }
+    // Call Groq AI
+    const aiResponse = await groqHelper.getGroqCompletion(systemPrompt, userPrompt, {
+      temperature: 0.4, // Lower for more factual outputs
+      maxTokens: 1500
     });
+
+    // Parse AI response
+    const cleaned = aiResponse.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(cleaned);
+
+    // Enhance response
+    const response = {
+      success: true,
+      videoId,
+      url,
+      title: title || 'YouTube Video',
+      summary: parsed.summary || 'Video analysis generated.',
+      chapters: parsed.chapters || [],
+      keyPoints: parsed.keyPoints || [],
+      targetAudience: parsed.targetAudience || 'General viewers',
+      analyzedAt: new Date()
+    };
+
+    console.log(`✅ Video analyzed: ${parsed.chapters.length} chapters generated`);
+
+    res.json(response);
 
   } catch (error) {
     console.error('❌ Error analyzing video:', error);

@@ -9,64 +9,55 @@ function SmartBookmarks() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
-  const [adding, setAdding] = useState(false);
 
   useEffect(() => {
     loadBookmarks();
   }, [selectedCategory]);
 
   const loadBookmarks = async () => {
-    setLoading(true);
     try {
       const response = await fetch(
         `${API_URL}/bookmarks/list?userId=default_user&category=${selectedCategory}`
       );
       const data = await response.json();
-
+      
       if (data.success) {
-        setBookmarks(data.bookmarks);
-        setCategories(['all', ...data.categories]);
+        setBookmarks(data.bookmarks || []);
+        setCategories(data.categories || []);
       }
     } catch (error) {
       console.error('Error loading bookmarks:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
-  const addCurrentPage = async () => {
-    setAdding(true);
+  const bookmarkCurrentPage = async () => {
+    setLoading(true);
     try {
-      // Get current tab
-      chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
-        const tab = tabs[0];
+      const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+      const currentTab = tabs[0];
 
-        const response = await fetch(`${API_URL}/bookmarks/add`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            userId: 'default_user',
-            title: tab.title,
-            url: tab.url,
-            description: tab.title,
-            favicon: tab.favIconUrl
-          })
-        });
-
-        const data = await response.json();
-
-        if (data.success) {
-          alert(`✅ Bookmarked as: ${data.bookmark.category}`);
-          loadBookmarks();
-        } else {
-          alert('Failed to add bookmark');
-        }
-        setAdding(false);
+      const response = await fetch(`${API_URL}/bookmarks/add`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: 'default_user',
+          title: currentTab.title,
+          url: currentTab.url,
+          description: ''
+        })
       });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        await loadBookmarks();
+        alert('✅ Bookmark saved with AI categorization!');
+      }
     } catch (error) {
-      console.error('Error:', error);
-      alert('Error adding bookmark!');
-      setAdding(false);
+      console.error('Error bookmarking:', error);
+      alert('❌ Failed to bookmark. Make sure backend is running.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -76,7 +67,6 @@ function SmartBookmarks() {
       return;
     }
 
-    setLoading(true);
     try {
       const response = await fetch(`${API_URL}/bookmarks/search`, {
         method: 'POST',
@@ -88,14 +78,11 @@ function SmartBookmarks() {
       });
 
       const data = await response.json();
-
       if (data.success) {
-        setBookmarks(data.bookmarks);
+        setBookmarks(data.bookmarks || []);
       }
     } catch (error) {
       console.error('Error searching:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -103,141 +90,142 @@ function SmartBookmarks() {
     if (!confirm('Delete this bookmark?')) return;
 
     try {
-      const response = await fetch(`${API_URL}/bookmarks/${id}`, {
-        method: 'DELETE'
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        loadBookmarks();
-      }
+      await fetch(`${API_URL}/bookmarks/${id}`, { method: 'DELETE' });
+      loadBookmarks();
     } catch (error) {
       console.error('Error deleting:', error);
     }
   };
 
-  const openBookmark = (url) => {
-    chrome.tabs.create({ url });
-  };
-
-  const getCategoryIcon = (category) => {
-    const icons = {
-      'Technology': '💻',
-      'Education': '📚',
-      'News': '📰',
-      'Entertainment': '🎬',
-      'Shopping': '🛒',
-      'Social Media': '📱',
-      'Tools': '🔧',
-      'Work': '💼',
-      'Finance': '💰',
-      'Health': '🏥',
-      'Travel': '✈️',
-      'Other': '📌'
-    };
-    return icons[category] || '🔖';
-  };
+  const filteredBookmarks = searchQuery 
+    ? bookmarks 
+    : bookmarks;
 
   return (
     <div className="smart-bookmarks">
+      {/* Header */}
       <div className="sb-header">
-        <h2>🔖 Smart Bookmarks</h2>
-        <p className="sb-subtitle">AI-organized bookmarks</p>
+        <div className="sb-title">
+          <span className="sb-icon">🔖</span>
+          <div>
+            <h2>Smart Bookmarks</h2>
+            <p className="sb-subtitle">AI-categorized bookmarks</p>
+          </div>
+        </div>
       </div>
 
-      {/* Add Current Page */}
-      <div className="sb-add">
+      {/* Add Bookmark Button */}
+      <div className="sb-add-section">
         <button 
-          className="add-current-btn"
-          onClick={addCurrentPage}
-          disabled={adding}
+          className="sb-add-btn"
+          onClick={bookmarkCurrentPage}
+          disabled={loading}
         >
-          {adding ? '🔄 Adding...' : '➕ Bookmark This Page'}
+          <span className="btn-icon">✨</span>
+          {loading ? 'Saving...' : 'Bookmark This Page'}
         </button>
       </div>
 
-      {/* Search Bar */}
-      <div className="sb-search">
-        <input
-          type="text"
-          placeholder="🔍 Search bookmarks..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          onKeyPress={(e) => e.key === 'Enter' && searchBookmarks()}
-        />
-        <button onClick={searchBookmarks}>Search</button>
-      </div>
-
-      {/* Category Filter */}
-      <div className="sb-categories">
-        {categories.map(cat => (
-          <button
-            key={cat}
-            className={`category-btn ${selectedCategory === cat ? 'active' : ''}`}
-            onClick={() => setSelectedCategory(cat)}
-          >
-            {cat === 'all' ? '📂 All' : `${getCategoryIcon(cat)} ${cat}`}
+      {/* Search & Filter */}
+      <div className="sb-controls">
+        <div className="search-bar">
+          <input
+            type="text"
+            placeholder="Search bookmarks..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && searchBookmarks()}
+            className="search-input"
+          />
+          <button className="search-btn" onClick={searchBookmarks}>
+            🔍
           </button>
-        ))}
+        </div>
+
+        {/* Category Pills */}
+        <div className="category-pills">
+          <button
+            className={`pill ${selectedCategory === 'all' ? 'active' : ''}`}
+            onClick={() => setSelectedCategory('all')}
+          >
+            All
+          </button>
+          {categories.slice(0, 5).map((cat) => (
+            <button
+              key={cat}
+              className={`pill ${selectedCategory === cat ? 'active' : ''}`}
+              onClick={() => setSelectedCategory(cat)}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Bookmarks List */}
-      {loading ? (
-        <div className="sb-loading">Loading bookmarks...</div>
-      ) : bookmarks.length === 0 ? (
-        <div className="sb-empty">
-          <p>📭 No bookmarks yet</p>
-          <p className="hint">Add your first bookmark to get started!</p>
-        </div>
-      ) : (
-        <div className="sb-list">
-          {bookmarks.map(bookmark => (
-            <div key={bookmark._id} className="bookmark-item">
-              <div 
-                className="bookmark-content"
-                onClick={() => openBookmark(bookmark.url)}
-              >
-                <div className="bookmark-icon">
-                  {bookmark.favicon ? (
-                    <img src={bookmark.favicon} alt="" />
+      <div className="sb-list">
+        {filteredBookmarks.length === 0 ? (
+          <div className="empty-state">
+            <span className="empty-icon">📚</span>
+            <h3>No bookmarks yet</h3>
+            <p>Bookmark your first page to get started!</p>
+          </div>
+        ) : (
+          filteredBookmarks.map((bookmark) => (
+            <div key={bookmark._id} className="bookmark-card">
+              <div className="bookmark-header">
+                <div className="bookmark-favicon">
+                  {bookmark.url ? (
+                    <img 
+                      src={`https://www.google.com/s2/favicons?domain=${new URL(bookmark.url).hostname}&sz=32`}
+                      alt=""
+                      onError={(e) => e.target.style.display = 'none'}
+                    />
                   ) : (
-                    <span>{getCategoryIcon(bookmark.category)}</span>
+                    <span>🌐</span>
                   )}
                 </div>
                 <div className="bookmark-info">
-                  <div className="bookmark-title">{bookmark.title}</div>
-                  <div className="bookmark-url">
-                    {new URL(bookmark.url).hostname}
-                  </div>
-                  {bookmark.summary && (
-                    <div className="bookmark-summary">{bookmark.summary}</div>
-                  )}
-                  <div className="bookmark-tags">
-                    {bookmark.tags.map((tag, i) => (
-                      <span key={i} className="tag">{tag}</span>
-                    ))}
-                  </div>
+                  <h3 className="bookmark-title">
+                    <a href={bookmark.url} target="_blank" rel="noopener noreferrer">
+                      {bookmark.title}
+                    </a>
+                  </h3>
+                  <p className="bookmark-url">
+                    {bookmark.url ? new URL(bookmark.url).hostname : ''}
+                  </p>
+                </div>
+                <button 
+                  className="bookmark-delete"
+                  onClick={() => deleteBookmark(bookmark._id)}
+                  title="Delete bookmark"
+                >
+                  ×
+                </button>
+              </div>
+
+              {bookmark.summary && (
+                <p className="bookmark-summary">{bookmark.summary}</p>
+              )}
+
+              <div className="bookmark-footer">
+                <span className="bookmark-category">{bookmark.category}</span>
+                <div className="bookmark-tags">
+                  {bookmark.tags?.slice(0, 3).map((tag, i) => (
+                    <span key={i} className="tag">#{tag}</span>
+                  ))}
                 </div>
               </div>
-              <button 
-                className="delete-btn"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  deleteBookmark(bookmark._id);
-                }}
-              >
-                🗑️
-              </button>
             </div>
-          ))}
-        </div>
-      )}
+          ))
+        )}
+      </div>
 
-      {/* Stats */}
+      {/* Stats Footer */}
       {bookmarks.length > 0 && (
-        <div className="sb-stats">
-          <p>📊 {bookmarks.length} bookmark(s) in {selectedCategory === 'all' ? 'all categories' : selectedCategory}</p>
+        <div className="sb-footer">
+          <span className="stats-icon">📊</span>
+          <span>{bookmarks.length} bookmark(s) in {selectedCategory === 'all' ? 'all categories' : selectedCategory}</span>
         </div>
       )}
     </div>

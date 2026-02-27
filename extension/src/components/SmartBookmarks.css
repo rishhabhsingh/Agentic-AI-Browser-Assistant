@@ -1,166 +1,183 @@
-
-/* Smooth page transition */
-@keyframes slideInRight {
-  from {
-    opacity: 0;
-    transform: translateX(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-/* Apply to main container of each component */
-.component-name {
-  animation: slideInRight 0.3s ease-out;
-}
-
-/* Button hover glow effect */
-button {
-  position: relative;
-  overflow: hidden;
-}
-
-button::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.3);
-  transform: translate(-50%, -50%);
-  transition: width 0.6s, height 0.6s;
-}
-
-button:hover::after {
-  width: 300px;
-  height: 300px;
-}
-
-/* Card lift effect */
-.card,
-.item,
-.bookmark-item,
-.tab-item {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.card:hover,
-.item:hover,
-.bookmark-item:hover,
-.tab-item:hover {
-  transform: translateY(-4px) scale(1.02);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
-}
+/* ============================================
+   SMART BOOKMARKS - PREMIUM DESIGN
+   ============================================ */
 
 .smart-bookmarks {
-  width: 100%;
-  max-height: 600px;
-  overflow-y: auto;
-  background: linear-gradient(135deg, #8e44ad 0%, #9b59b6 100%);
+  width: 100% !important;
+  max-width: 400px !important;
+  min-width: 400px !important;
+  min-height: 600px;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
   color: white;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
+
+/* Scrollbar */
+.smart-bookmarks::-webkit-scrollbar {
+  width: 8px;
+}
+
+.smart-bookmarks::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.smart-bookmarks::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+}
+
+/* ============================================
+   HEADER
+   ============================================ */
 
 .sb-header {
   padding: 20px;
-  background: linear-gradient(135deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.1));
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.2);
   backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.sb-header h2 {
+.sb-title {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.sb-icon {
+  font-size: 36px;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-5px); }
+}
+
+.sb-title h2 {
   font-size: 22px;
-  margin-bottom: 8px;
-  background: linear-gradient(135deg, #fff, #f0c0ff);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
   font-weight: 700;
+  margin-bottom: 4px;
 }
 
 .sb-subtitle {
-  font-size: 13px;
+  font-size: 12px;
   opacity: 0.9;
 }
 
-.sb-add {
+/* ============================================
+   ADD BOOKMARK SECTION
+   ============================================ */
+
+.sb-add-section {
   padding: 15px;
   background: rgba(0, 0, 0, 0.1);
 }
 
-.add-current-btn {
+.sb-add-btn {
   width: 100%;
-  padding: 14px;
-  background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+  padding: 16px 24px;
+  background: linear-gradient(135deg, #fff, #f0f0f0);
+  color: #f5576c;
   border: none;
-  border-radius: 10px;
-  color: white;
-  font-size: 14px;
+  border-radius: 12px;
+  font-size: 16px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
-.add-current-btn:hover {
+.btn-icon {
+  font-size: 20px;
+}
+
+.sb-add-btn:hover:not(:disabled) {
   transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(39, 174, 96, 0.5);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
 }
 
-.add-current-btn:disabled {
-  opacity: 0.5;
+.sb-add-btn:disabled {
+  opacity: 0.6;
   cursor: not-allowed;
-  transform: none;
 }
 
-.sb-search {
+/* ============================================
+   SEARCH & FILTER CONTROLS
+   ============================================ */
+
+.sb-controls {
   padding: 15px;
+}
+
+.search-bar {
   display: flex;
   gap: 10px;
+  margin-bottom: 15px;
 }
 
-.sb-search input {
+.search-input {
   flex: 1;
-  padding: 10px 15px;
+  padding: 12px 16px;
   background: rgba(255, 255, 255, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 8px;
+  border-radius: 10px;
   color: white;
   font-size: 14px;
-}
-
-.sb-search input::placeholder {
-  color: rgba(255, 255, 255, 0.6);
-}
-
-.sb-search button {
-  padding: 10px 20px;
-  background: linear-gradient(135deg, #3498db, #2980b9);
-  border: none;
-  border-radius: 8px;
-  color: white;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
+  backdrop-filter: blur(10px);
+  outline: none;
   transition: all 0.3s ease;
 }
 
-.sb-search button:hover {
+.search-input::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.search-input:focus {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.search-btn {
+  padding: 12px 20px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.search-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
   transform: scale(1.05);
 }
 
-.sb-categories {
-  padding: 15px;
+/* Category Pills */
+.category-pills {
   display: flex;
   gap: 8px;
   overflow-x: auto;
-  background: rgba(0, 0, 0, 0.1);
+  padding-bottom: 5px;
 }
 
-.category-btn {
-  padding: 8px 15px;
+.category-pills::-webkit-scrollbar {
+  height: 4px;
+}
+
+.category-pills::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 2px;
+}
+
+.pill {
+  padding: 8px 16px;
   background: rgba(255, 255, 255, 0.15);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 20px;
@@ -168,65 +185,112 @@ button:hover::after {
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
+  transition: all 0.3s ease;
   white-space: nowrap;
-  transition: all 0.3s ease;
-}
-
-.category-btn:hover {
-  background: rgba(255, 255, 255, 0.25);
-}
-
-.category-btn.active {
-  background: linear-gradient(135deg, #3498db, #2980b9);
-  border-color: rgba(52, 152, 219, 0.8);
-  box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
-}
-
-.sb-list {
-  padding: 10px 15px;
-}
-
-.bookmark-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px;
-  margin-bottom: 10px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  cursor: pointer;
-  transition: all 0.3s ease;
   backdrop-filter: blur(10px);
 }
 
-.bookmark-item:hover {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.15));
-  transform: translateX(5px);
+.pill:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
 }
 
-.bookmark-content {
+.pill.active {
+  background: rgba(255, 255, 255, 0.35);
+  border-color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* ============================================
+   BOOKMARKS LIST
+   ============================================ */
+
+.sb-list {
+  padding: 15px;
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 12px;
-  flex: 1;
 }
 
-.bookmark-icon {
-  width: 40px;
-  height: 40px;
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.empty-icon {
+  font-size: 64px;
+  display: block;
+  margin-bottom: 20px;
+  animation: float 3s ease-in-out infinite;
+}
+
+.empty-state h3 {
+  font-size: 20px;
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+
+.empty-state p {
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+/* Bookmark Card */
+.bookmark-card {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 16px;
+  transition: all 0.3s ease;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.bookmark-card:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Bookmark Header */
+.bookmark-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.bookmark-favicon {
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
-  font-size: 20px;
+  flex-shrink: 0;
+  overflow: hidden;
 }
 
-.bookmark-icon img {
+.bookmark-favicon img {
   width: 24px;
   height: 24px;
-  border-radius: 4px;
+}
+
+.bookmark-favicon span {
+  font-size: 18px;
 }
 
 .bookmark-info {
@@ -235,87 +299,124 @@ button:hover::after {
 }
 
 .bookmark-title {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
-  margin-bottom: 4px;
+  margin: 0 0 4px 0;
+  line-height: 1.3;
+}
+
+.bookmark-title a {
+  color: white;
+  text-decoration: none;
+  display: block;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  transition: opacity 0.2s ease;
+}
+
+.bookmark-title a:hover {
+  opacity: 0.8;
+  text-decoration: underline;
 }
 
 .bookmark-url {
   font-size: 12px;
   opacity: 0.7;
-  margin-bottom: 4px;
+  margin: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+.bookmark-delete {
+  width: 28px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.bookmark-delete:hover {
+  background: rgba(231, 76, 60, 0.8);
+  transform: scale(1.1);
+}
+
+/* Bookmark Summary */
 .bookmark-summary {
-  font-size: 11px;
-  opacity: 0.8;
-  margin-bottom: 6px;
-  line-height: 1.4;
+  font-size: 13px;
+  line-height: 1.5;
+  opacity: 0.9;
+  margin: 0 0 12px 0;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
+/* Bookmark Footer */
+.bookmark-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.bookmark-category {
+  padding: 4px 12px;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
 .bookmark-tags {
   display: flex;
-  gap: 4px;
+  gap: 6px;
   flex-wrap: wrap;
 }
 
 .tag {
-  display: inline-block;
-  padding: 3px 8px;
-  background: rgba(52, 152, 219, 0.3);
-  border-radius: 10px;
-  font-size: 10px;
+  padding: 4px 8px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  font-size: 11px;
   font-weight: 600;
 }
 
-.delete-btn {
-  width: 36px;
-  height: 36px;
-  background: rgba(231, 76, 60, 0.3);
-  border: 1px solid rgba(231, 76, 60, 0.5);
-  border-radius: 8px;
-  color: white;
-  font-size: 16px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
+/* ============================================
+   FOOTER STATS
+   ============================================ */
 
-.delete-btn:hover {
-  background: rgba(231, 76, 60, 0.5);
-  transform: scale(1.1);
-}
-
-.sb-loading,
-.sb-empty {
-  padding: 40px 20px;
-  text-align: center;
-}
-
-.sb-empty p {
-  margin-bottom: 10px;
-  font-size: 14px;
-}
-
-.hint {
-  font-size: 12px;
-  opacity: 0.7;
-}
-
-.sb-stats {
-  padding: 15px;
-  text-align: center;
-  font-size: 12px;
-  opacity: 0.8;
+.sb-footer {
+  padding: 15px 20px;
   background: rgba(0, 0, 0, 0.2);
   border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.stats-icon {
+  font-size: 16px;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 450px) {
+  .category-pills {
+    flex-wrap: nowrap;
+  }
 }

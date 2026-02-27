@@ -96,158 +96,315 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     sendResponse({ success: true });
     return true;
   }
+  
+  if (request.action === 'getSelection') {
+    const selectedText = window.getSelection().toString().trim();
+    sendResponse({ 
+      text: selectedText,
+      url: window.location.href
+    });
+    return true;
+  }
+  
+  if (request.action === 'getPageContent') {
+    const content = {
+      title: document.title,
+      url: window.location.href,
+      text: document.body.innerText.substring(0, 5000)
+    };
+    sendResponse(content);
+    return true;
+  }
 });
 
 function enableReadingMode(fontSize, theme) {
   if (readingModeActive) return;
 
-  // Save original content
+  // Save original state
   originalContent = {
     bodyHTML: document.body.innerHTML,
     bodyStyle: document.body.style.cssText,
     htmlStyle: document.documentElement.style.cssText
   };
 
-  // Find main content
-  const article = document.querySelector('article') || 
-                  document.querySelector('[role="main"]') || 
-                  document.querySelector('main') ||
-                  document.querySelector('.post-content') ||
-                  document.querySelector('.article-content') ||
-                  document.querySelector('.entry-content') ||
-                  document.querySelector('#content');
+  // Find main content with priority order
+  let article = 
+    document.querySelector('article') ||
+    document.querySelector('[role="main"]') ||
+    document.querySelector('main') ||
+    document.querySelector('.post-content') ||
+    document.querySelector('.article-content') ||
+    document.querySelector('.entry-content') ||
+    document.querySelector('.content') ||
+    document.querySelector('#content');
+
+  if (!article) {
+    // Fallback: Find largest text container
+    const candidates = document.querySelectorAll('div, section');
+    let largest = null;
+    let maxLength = 0;
+    
+    candidates.forEach(el => {
+      const text = el.innerText || '';
+      if (text.length > maxLength && text.length > 500) {
+        maxLength = text.length;
+        largest = el;
+      }
+    });
+    
+    article = largest;
+  }
 
   if (!article) {
     alert('Could not find main content on this page. Try a different page.');
     return;
   }
 
-  // Extract content
-  const title = document.querySelector('h1') || document.querySelector('title');
-  const titleText = title ? title.textContent : '';
+  // Extract title
+  const titleElement = document.querySelector('h1') || document.querySelector('title');
+  const titleText = titleElement ? titleElement.textContent.trim() : document.title;
+
+  // Theme colors
+  const themes = {
+    light: {
+      bg: '#f8f9fa',
+      text: '#2c3e50',
+      secondary: '#7f8c8d',
+      border: '#e0e0e0',
+      button: '#3498db',
+      buttonHover: '#2980b9'
+    },
+    dark: {
+      bg: '#1a1a1a',
+      text: '#e0e0e0',
+      secondary: '#b0b0b0',
+      border: '#333333',
+      button: '#3498db',
+      buttonHover: '#5dade2'
+    }
+  };
+
+  const colors = themes[theme] || themes.light;
 
   // Create reading mode container
   const container = document.createElement('div');
-  container.id = 'reading-mode-container';
+  container.id = 'browserbuddy-reading-mode';
   container.innerHTML = `
-    <div class="reading-mode-header">
+    <div class="reading-header">
       <h1>${titleText}</h1>
       <button id="exit-reading-mode">✕ Exit Reading Mode</button>
     </div>
-    <div class="reading-mode-content">
+    <div class="reading-content">
       ${article.innerHTML}
     </div>
   `;
 
-  // Clear body and add container
+  // Clear body
   document.body.innerHTML = '';
   document.body.appendChild(container);
 
-  // Apply styles
-  const bgColor = theme === 'dark' ? '#1a1a1a' : '#ffffff';
-  const textColor = theme === 'dark' ? '#e0e0e0' : '#333333';
-
-  const style = document.createElement('style');
-  style.id = 'reading-mode-styles';
-  style.textContent = `
+  // Apply styles via style tag (more reliable than inline)
+  const styleElement = document.createElement('style');
+  styleElement.id = 'browserbuddy-reading-styles';
+  styleElement.textContent = `
+    /* Reset everything */
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
     
+    /* Body styles */
     body {
-      background: ${bgColor} !important;
-      color: ${textColor} !important;
-      font-family: Georgia, 'Times New Roman', serif !important;
+      background: ${colors.bg} !important;
+      color: ${colors.text} !important;
+      font-family: 'Georgia', 'Times New Roman', serif !important;
       line-height: 1.8 !important;
       overflow-y: auto !important;
+      padding: 0 !important;
+      margin: 0 !important;
     }
     
-    #reading-mode-container {
+    /* Container */
+    #browserbuddy-reading-mode {
       max-width: 800px;
       margin: 0 auto;
       padding: 40px 20px;
+      min-height: 100vh;
     }
     
-    .reading-mode-header {
+    /* Header */
+    .reading-header {
       margin-bottom: 40px;
-      border-bottom: 2px solid ${theme === 'dark' ? '#333' : '#ddd'};
+      border-bottom: 2px solid ${colors.border};
       padding-bottom: 20px;
+      position: sticky;
+      top: 0;
+      background: ${colors.bg};
+      z-index: 1000;
+      padding-top: 20px;
     }
     
-    .reading-mode-header h1 {
+    .reading-header h1 {
       font-size: ${fontSize + 8}px !important;
-      margin-bottom: 20px;
-      color: ${textColor} !important;
+      margin-bottom: 20px !important;
+      color: ${colors.text} !important;
+      font-weight: 700 !important;
+      line-height: 1.3 !important;
     }
     
+    /* Exit button */
     #exit-reading-mode {
-      background: ${theme === 'dark' ? '#333' : '#f0f0f0'};
-      color: ${textColor};
-      border: none;
-      padding: 10px 20px;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 600;
+      background: ${colors.button} !important;
+      color: white !important;
+      border: none !important;
+      padding: 12px 24px !important;
+      border-radius: 6px !important;
+      cursor: pointer !important;
+      font-size: 14px !important;
+      font-weight: 600 !important;
+      transition: all 0.3s ease !important;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
     }
     
     #exit-reading-mode:hover {
-      background: ${theme === 'dark' ? '#444' : '#e0e0e0'};
+      background: ${colors.buttonHover} !important;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     }
     
-    .reading-mode-content {
+    /* Content area */
+    .reading-content {
       font-size: ${fontSize}px !important;
-      color: ${textColor} !important;
+      color: ${colors.text} !important;
     }
     
-    .reading-mode-content p {
+    /* Paragraphs */
+    .reading-content p {
       margin-bottom: 1.5em !important;
+      line-height: 1.8 !important;
+      color: ${colors.text} !important;
+    }
+    
+    /* Headings */
+    .reading-content h2,
+    .reading-content h3,
+    .reading-content h4,
+    .reading-content h5,
+    .reading-content h6 {
+      margin-top: 2em !important;
+      margin-bottom: 1em !important;
+      color: ${colors.text} !important;
+      font-weight: 700 !important;
+      line-height: 1.3 !important;
+    }
+    
+    .reading-content h2 { font-size: ${fontSize + 6}px !important; }
+    .reading-content h3 { font-size: ${fontSize + 4}px !important; }
+    .reading-content h4 { font-size: ${fontSize + 2}px !important; }
+    
+    /* Links */
+    .reading-content a {
+      color: ${colors.button} !important;
+      text-decoration: underline !important;
+      word-break: break-word !important;
+    }
+    
+    .reading-content a:hover {
+      color: ${colors.buttonHover} !important;
+    }
+    
+    /* Lists */
+    .reading-content ul,
+    .reading-content ol {
+      margin-left: 2em !important;
+      margin-bottom: 1.5em !important;
+    }
+    
+    .reading-content li {
+      margin-bottom: 0.5em !important;
       line-height: 1.8 !important;
     }
     
-    .reading-mode-content h2,
-    .reading-mode-content h3,
-    .reading-mode-content h4 {
-      margin-top: 2em !important;
-      margin-bottom: 1em !important;
-      color: ${textColor} !important;
-    }
-    
-    .reading-mode-content img {
+    /* Images */
+    .reading-content img {
       max-width: 100% !important;
       height: auto !important;
       margin: 2em 0 !important;
+      display: block !important;
+      border-radius: 8px !important;
     }
     
-    .reading-mode-content a {
-      color: ${theme === 'dark' ? '#6db3f2' : '#0066cc'} !important;
-      text-decoration: underline;
+    /* Blockquotes */
+    .reading-content blockquote {
+      border-left: 4px solid ${colors.border} !important;
+      padding-left: 20px !important;
+      margin: 1.5em 0 !important;
+      font-style: italic !important;
+      color: ${colors.secondary} !important;
     }
     
-    .reading-mode-content blockquote {
-      border-left: 4px solid ${theme === 'dark' ? '#555' : '#ccc'};
-      padding-left: 20px;
-      margin: 1.5em 0;
-      font-style: italic;
+    /* Code blocks */
+    .reading-content pre,
+    .reading-content code {
+      background: ${theme === 'dark' ? '#2a2a2a' : '#f5f5f5'} !important;
+      padding: 2px 6px !important;
+      border-radius: 3px !important;
+      font-family: 'Courier New', monospace !important;
+      font-size: ${fontSize - 2}px !important;
+    }
+    
+    .reading-content pre {
+      padding: 15px !important;
+      overflow-x: auto !important;
+      margin: 1.5em 0 !important;
+    }
+    
+    /* Tables */
+    .reading-content table {
+      width: 100% !important;
+      border-collapse: collapse !important;
+      margin: 2em 0 !important;
+    }
+    
+    .reading-content th,
+    .reading-content td {
+      border: 1px solid ${colors.border} !important;
+      padding: 12px !important;
+      text-align: left !important;
+    }
+    
+    .reading-content th {
+      background: ${theme === 'dark' ? '#2a2a2a' : '#f5f5f5'} !important;
+      font-weight: 700 !important;
+    }
+    
+    /* Remove unwanted elements */
+    .reading-content iframe,
+    .reading-content .ad,
+    .reading-content .advertisement,
+    .reading-content .social-share,
+    .reading-content .comments,
+    .reading-content nav,
+    .reading-content aside {
+      display: none !important;
     }
   `;
-  
-  document.head.appendChild(style);
+
+  document.head.appendChild(styleElement);
 
   // Add exit button handler
   document.getElementById('exit-reading-mode').addEventListener('click', disableReadingMode);
 
   readingModeActive = true;
-  console.log('✅ Reading mode enabled');
+  console.log('✅ BrowserBuddy Reading Mode enabled');
 }
 
 function disableReadingMode() {
   if (!readingModeActive || !originalContent) return;
 
   // Remove styles
-  const styles = document.getElementById('reading-mode-styles');
+  const styles = document.getElementById('browserbuddy-reading-styles');
   if (styles) styles.remove();
 
   // Restore original content
@@ -257,8 +414,10 @@ function disableReadingMode() {
 
   readingModeActive = false;
   originalContent = null;
-  console.log('✅ Reading mode disabled');
+  console.log('✅ BrowserBuddy Reading Mode disabled');
 }
+
+console.log('🎯 BrowserBuddy AI Content Script loaded');
 
 // ============================================
 // FORM FILLING FUNCTIONS (FIXED VERSION)
