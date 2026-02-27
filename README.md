@@ -2,12 +2,6 @@
 
 **Your Intelligent Browsing Assistant Powered by AI**
 
-[![Made with Love](https://img.shields.io/badge/Made%20with-❤️-red.svg)](https://github.com/yourusername/browserbuddy-ai)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
-
-![BrowserBuddy AI Banner](https://via.placeholder.com/1200x400/667eea/ffffff?text=BrowserBuddy+AI)
-
 ---
 
 ## 🌟 What is BrowserBuddy AI?
@@ -50,7 +44,15 @@ Distraction-free reading experience!
 - ✨ Clean, focused layout
 - 📱 Works on articles, blogs, news
 
-### 4. 🔖 **Smart Bookmarks**
+### 4. 🎥 **YouTube Summary Mode**
+Quick, distraction-free video insights!
+- 📝 Instant AI-generated summaries
+- ⏱️ Key points with timestamps
+- 📌 Bullet-point highlights for fast review
+- 🧠 Extracts main ideas & takeaways
+- 📱 Works on tutorials, lectures, podcasts, news, and more
+
+### 5. 🔖 **Smart Bookmarks**
 AI organizes your bookmarks automatically!
 - 🤖 Auto-categorization (12 categories)
 - 🏷️ Smart tag generation
@@ -58,23 +60,7 @@ AI organizes your bookmarks automatically!
 - 📁 Category filtering
 - ⚡ One-click bookmark saving
 
-### 5. ⚙️ **Settings & Customization**
-Complete control over your experience!
-- 🎨 Theme switching (Auto/Light/Dark)
-- 🔤 Font size preferences
-- 🎚️ Feature toggles
-- ⌨️ Keyboard shortcuts
-- 🔒 Privacy controls
-
-### 6. 📝 **Auto Form Filler**
-Never fill forms manually again!
-- 👤 Save your profile once
-- 🎯 AI matches fields intelligently
-- ⚡ One-click autofill
-- 📋 Works on Google Forms, job applications, etc.
-- ✨ Visual feedback on filled fields
-
-### 7. 📄 **Resume Optimizer**
+### 6. 📄 **Resume Optimizer**
 Get that job with ATS-friendly resumes!
 - 🎯 Keyword extraction from job descriptions
 - 📊 Match score calculation (0-100%)
@@ -82,31 +68,27 @@ Get that job with ATS-friendly resumes!
 - 📥 Generate ATS-friendly .docx templates
 - ✅ Highlight matched/missing keywords
 
+### 7. ⚙️ **Settings & Customization**
+Complete control over your experience!
+- 🎨 Theme switching (Auto/Light/Dark)
+- 🔤 Font size preferences
+- 🎚️ Feature toggles
+- ⌨️ Keyboard shortcuts
+- 🔒 Privacy controls
 ---
 
 ## 🚀 Quick Start
 
-### Installation
+### Installation:
 
-#### Option 1: Chrome Web Store (Recommended)
-```
-Coming soon! Currently in review.
-```
-
-#### Option 2: Manual Installation
-1. Download the latest release from [Releases](https://github.com/yourusername/browserbuddy-ai/releases)
+#### Manual Installation
+1. Download the latest release from [Releases](https://github.com/rishhabhsingh/Agentic-AI-Browser-Assistant/releases/tag/v1.0.0)
 2. Unzip the file
 3. Open Chrome → `chrome://extensions/`
 4. Enable "Developer mode" (top right)
 5. Click "Load unpacked"
 6. Select the unzipped folder
 7. 🎉 Done! Click the extension icon to start
-
-### First-Time Setup
-1. Click the BrowserBuddy icon in your toolbar
-2. Go to Settings → Configure your preferences
-3. (Optional) Set up Form Filler profile for auto-fill
-4. Start browsing smarter! 🚀
 
 ---
 
@@ -131,20 +113,6 @@ Coming soon! Currently in review.
 - **Features:** All features have non-AI fallbacks
 
 ---
-
-## 📸 Screenshots
-
-### Home Screen
-![Home Screen](https://via.placeholder.com/800x500/667eea/ffffff?text=Home+Screen)
-
-### Smart Tab Manager
-![Tab Manager](https://via.placeholder.com/800x500/2980b9/ffffff?text=Tab+Manager)
-
-### Content Simplifier
-![Content Simplifier](https://via.placeholder.com/800x500/16a085/ffffff?text=Content+Simplifier)
-
-### Resume Optimizer
-![Resume Optimizer](https://via.placeholder.com/800x500/d35400/ffffff?text=Resume+Optimizer)
 
 ---
 
@@ -222,7 +190,6 @@ See [API.md](docs/API.md) for complete API reference.
 - `/simplify/*` - Content simplification
 - `/bookmarks/*` - Bookmark management
 - `/settings/*` - User settings
-- `/formfill/*` - Form filling
 - `/resume/*` - Resume optimization
 
 ---
@@ -242,7 +209,8 @@ We love contributions! See [DEVELOPER.md](docs/DEVELOPER.md) for guidelines.
 
 ## 📄 License
 
-This project is licensed under the MIT License - see [LICENSE](LICENSE) file.
+This project is released for general public use.
+You are free to use, copy, modify, and distribute this project for personal or commercial purposes. No formal license is required..
 
 ---
 
@@ -258,10 +226,7 @@ This project is licensed under the MIT License - see [LICENSE](LICENSE) file.
 
 ## 📞 Support
 
-- 📧 **Email:** your.email@example.com
-- 🐛 **Issues:** [GitHub Issues](https://github.com/yourusername/browserbuddy-ai/issues)
-- 💬 **Discussions:** [GitHub Discussions](https://github.com/yourusername/browserbuddy-ai/discussions)
-- 🌐 **Website:** [browserbuddy-ai.vercel.app](https://browser-buddy-ai-assitant.vercel.app/)
+- 📧 **Email:** singhrishabh2308@gmail.com
 
 ---
 
@@ -291,12 +256,11 @@ If BrowserBuddy AI helps you, consider:
 - 🐛 Reporting bugs
 - 💡 Suggesting features
 - 📢 Sharing with friends
-- ☕ [Buy me a coffee](https://buymeacoffee.com/yourname)
 
 ---
 
-**Made with ❤️ by [Your Name]**  
-**College Final Year Project | 2025**
+**Made with ❤️ by [Rishabh Singh]**  
+**College Final Year Project | 2026**
 
 ---
 
