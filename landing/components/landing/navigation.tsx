@@ -38,8 +38,10 @@ export function Navigation() {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6">
           {/* Logo */}
           <a href="#" className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#e67e22]">
-              <span className="text-lg font-bold text-background">B</span>
+            <div>
+              <span className="flex h-8 w-8 items-center justify-center">
+                <img src="https://cdn-icons-png.flaticon.com/128/17317/17317518.png" alt="BrowserBuddy AI Logo" />
+              </span>
             </div>
             <span className="font-heading text-lg font-bold text-foreground">
               BrowserBuddy <span className="text-[#e67e22]">AI</span>
@@ -62,7 +64,7 @@ export function Navigation() {
           {/* CTA Button */}
           <div className="hidden md:block">
             <a
-              href="https://chrome.google.com/webstore/category/extensions"
+              href="https://github.com/rishhabhsingh/Agentic-AI-Browser-Assistant/releases/tag/v1.0.0"
               target="_blank"
               rel="noopener noreferrer"
               className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-[#e67e22] px-5 py-2.5 text-sm font-semibold text-background transition-all duration-300 hover:bg-[#d35400] hover:shadow-[0_0_30px_rgba(230,126,34,0.4)]"
@@ -106,7 +108,7 @@ export function Navigation() {
                 </a>
               ))}
               <a
-                href="https://chrome.google.com/webstore/category/extensions"
+                href="https://github.com/rishhabhsingh/Agentic-AI-Browser-Assistant/releases/tag/v1.0.0"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mt-2 inline-flex items-center justify-center gap-2 rounded-full bg-[#e67e22] px-5 py-3 text-sm font-semibold text-background"

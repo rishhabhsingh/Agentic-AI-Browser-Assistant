@@ -51,7 +51,7 @@ export function CTA() {
               className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row"
             >
               <a
-                href="https://chrome.google.com/webstore/category/extensions"
+                href="https://github.com/rishhabhsingh/Agentic-AI-Browser-Assistant/releases/tag/v1.0.0"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group inline-flex items-center gap-2.5 rounded-full bg-[#e67e22] px-8 py-4 text-base font-semibold text-background transition-all duration-300 hover:bg-[#d35400] hover:shadow-[0_0_40px_rgba(230,126,34,0.4)]"

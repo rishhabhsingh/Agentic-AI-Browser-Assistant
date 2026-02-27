@@ -3,11 +3,12 @@
 import { Github, FileText, Lock, CircleUserRound, Mail } from "lucide-react"
 
 const links = [
-  { label: "Documentation", href: "/docs/pdf/Documentation for BrowserBuddy AI.pdf", icon: FileText },
+  { label: "Installation Guide", href: "https://github.com/rishhabhsingh/Agentic-AI-Browser-Assistant/blob/main/docs/INSTALLATION_GUIDE.md", icon: FileText },
+  { label: "Documentation", href: "https://acrobat.adobe.com/id/urn:aaid:sc:AP:e3a9a7fe-2784-4871-bba2-f8908d0f0b11", icon: FileText },
   { label: "GitHub", href: "https://github.com/rishhabhsingh", icon: Github },
   { label: "About the Developer", href: "#", icon: CircleUserRound },
   { label: "Contact", href: "https://www.linkedin.com/in/rishabh-singh-b13773225", icon: Mail },
-   { label: "Privacy Policy", href: "/docs/pdf/Privacy Policy for BrowserBuddy AI.pdf", icon: Lock }
+   { label: "Privacy Policy", href: "https://acrobat.adobe.com/id/urn:aaid:sc:AP:b6bafb16-91e3-4370-b58a-a3a549299173", icon: Lock }
 ]
 
 export function Footer() {
@@ -18,8 +19,10 @@ export function Footer() {
           {/* Logo and tagline */}
           <div className="text-center md:text-left">
             <div className="flex items-center justify-center gap-2 md:justify-start">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#e67e22]">
-                <span className="text-sm font-bold text-background">B</span>
+              <div>
+                <span className="flex h-8 w-8 items-center justify-center">
+                <img src="https://cdn-icons-png.flaticon.com/128/17317/17317518.png" alt="BrowserBuddy AI Logo" />
+              </span>
               </div>
               <span className="font-heading text-base font-bold text-foreground">
                 BrowserBuddy <span className="text-[#e67e22]">AI</span>

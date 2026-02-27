@@ -7,7 +7,7 @@ import { Zap, DollarSign, Brain, Lock } from "lucide-react"
 const stats = [
   {
     icon: Zap,
-    value: 7,
+    value: 6,
     suffix: "",
     label: "AI-Powered Features",
     color: "#e67e22",

@@ -72,7 +72,7 @@ export function Hero() {
           className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row"
         >
           <a
-            href="https://chrome.google.com/webstore/category/extensions"
+            href="https://github.com/rishhabhsingh/Agentic-AI-Browser-Assistant/releases/tag/v1.0.0"
             target="_blank"
             rel="noopener noreferrer"
             className="group relative inline-flex items-center gap-2.5 rounded-full bg-[#e67e22] px-8 py-4 text-base font-semibold text-background transition-all duration-300 hover:bg-[#d35400] hover:shadow-[0_0_40px_rgba(230,126,34,0.4)] animate-pulse-glow"
@@ -134,9 +134,9 @@ export function Hero() {
                 {[
                   { name: "Smart Tabs", color: "#e67e22", width: 82},
                   { name: "Simplifier", color: "#3498db", width: 74},
-                  { name: "Reading Mode", color: "#e67e22", width: 74},
+                  { name: "YouTube Summaries", color: "#FF0000", width: 74},
                   { name: "Bookmarks", color: "#3498db", width: 74},
-                  { name: "Form Filler", color: "#e67e22", width: 74},
+                  { name: "Reading Mode", color: "#e67e22", width: 74},
                   { name: "Resume AI", color: "#3498db", width: 74},
                 ].map((item) => (
                   <div

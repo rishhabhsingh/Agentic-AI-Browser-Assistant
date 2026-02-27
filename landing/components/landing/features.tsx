@@ -9,6 +9,7 @@ import {
   PenTool,
   FileCheck,
   Settings,
+  Youtube,
 } from "lucide-react"
 
 const features = [
@@ -27,6 +28,13 @@ const features = [
     color: "#3498db",
   },
   {
+    icon: Youtube,
+    title: "YouTube Summaries",
+    description:
+      "Get AI-powered summaries of YouTube videos instantly. Save time and capture key insights in seconds.",
+    color: "#FF0000",
+  },
+  {
     icon: BookOpen,
     title: "Reading Mode",
     description:
@@ -39,13 +47,6 @@ const features = [
     description:
       "AI automatically categorizes your bookmarks. Never search again.",
     color: "#3498db",
-  },
-  {
-    icon: PenTool,
-    title: "Auto Form Filler",
-    description:
-      "One-click form filling with AI-powered field matching.",
-    color: "#e67e22",
   },
   {
     icon: FileCheck,
@@ -84,7 +85,7 @@ export function Features() {
             <span className="gradient-text">browse smarter</span>
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
-            Seven AI-powered tools designed to eliminate friction and supercharge
+            Six AI-powered tools designed to eliminate friction and supercharge
             your browsing workflow.
           </p>
         </motion.div>
